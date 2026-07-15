@@ -137,6 +137,57 @@ git push origin main
 
 Acompanha em **Actions**, no GitHub — se rodar verde, o site já deve refletir a mudança em `https://ricardordrj.com`.
 
+## 8. Proteger o acesso (Cloudflare Access)
+
+Autenticação sem escrever código — tudo configurado no painel da Cloudflare (Zero Trust), na frente do domínio. Ninguém chega no servidor sem antes passar por aqui.
+
+### 8.1 Ativar o Zero Trust
+
+Na primeira vez, a Cloudflare pede pra escolher um **team name** (vira `SEUTIME.cloudflareaccess.com` — é só um identificador interno deles, não afeta seu domínio real). Escolhe qualquer nome disponível.
+
+### 8.2 Método de login 1 — One-Time PIN (fallback, zero configuração)
+
+Zero Trust → **Settings → Authentication** (ou "Identity providers", dependendo da versão do painel) → **Add new** → **One-time PIN** → Save.
+
+Esse método já funciona pra qualquer e-mail que você colocar na política de acesso (passo 8.4) — sem cadastro externo nenhum. É o que seu amigo vai usar, se um dia você liberar acesso pra ele.
+
+### 8.3 Método de login 2 — Google (seu uso do dia a dia)
+
+Precisa criar um client OAuth no Google Cloud Console primeiro:
+
+1. Acessa [console.cloud.google.com](https://console.cloud.google.com), cria um projeto novo (ou usa um existente)
+2. **APIs & Services → OAuth consent screen** → configura como **External**, preenche nome do app e e-mail de suporte
+3. **APIs & Services → Credentials → Create Credentials → OAuth client ID** → tipo **Web application**
+4. Em **Authorized redirect URIs**, adiciona:
+   ```
+   https://SEUTIME.cloudflareaccess.com/cdn-cgi/access/callback
+   ```
+   (troca `SEUTIME` pelo team name do passo 8.1)
+5. Copia o **Client ID** e o **Client Secret** gerados
+
+Volta pro Cloudflare: Zero Trust → **Identity providers** → **Add new** → **Google** → cola o Client ID e Client Secret → **Save**. Testa a conexão com o botão **Test** ao lado do provider.
+
+### 8.4 Criar a Access Application
+
+Zero Trust → **Access → Applications → Add an application → Self-hosted**:
+
+1. **Application domain**: `ricardordrj.com`
+2. Em **Identity providers**, marca **One-Time PIN** e **Google** (os dois que configuramos)
+3. **Session duration**: pode deixar algo confortável tipo 24h ou 1 semana, já que é uso pessoal
+4. Cria a **Access Policy**:
+   - Nome: `Só eu`
+   - Action: **Allow**
+   - Include: **Emails** → seu e-mail (`ricardordrj@gmail.com` ou o que você usa no Google)
+5. Salva
+
+### 8.5 Testar
+
+Abre uma aba anônima e acessa `https://ricardordrj.com` — deve aparecer a tela de login da Cloudflare (com as opções Google e One-Time PIN) **antes** de qualquer coisa do seu app. Só entra quem estiver na política.
+
+### 8.6 Liberar um amigo depois (fallback)
+
+Edita a Access Policy do passo 8.4 → adiciona o e-mail da pessoa na lista de **Emails** incluídos → salva. Na próxima vez que essa pessoa acessar o site, ela recebe um código por e-mail (One-Time PIN) e entra — sem precisar configurar nada do lado dela. Pra revogar, é só tirar o e-mail da lista.
+
 ## Notas de segurança
 
 - O usuário `deploy` roda o app sem privilégios de root — se o app for comprometido, o estrago fica bem mais contido.

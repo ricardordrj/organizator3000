@@ -8,7 +8,8 @@ Lista de melhorias planejadas para o organizador pessoal. Conforme forem sendo u
 
 ## Infraestrutura
 
-- [ ] **Hospedar o app na internet** — VPS Vultr (São Paulo, vc2-1c-1gb + backup automático) + domínio `ricardordrj.com` via Cloudflare + deploy automático a cada push na `main` (GitHub Actions). Passo a passo completo em [DEPLOY.md](DEPLOY.md).
+- [x] **Hospedar o app na internet** — VPS Vultr (São Paulo, vc2-1c-1gb + backup automático) + domínio `ricardordrj.com` via Cloudflare, no ar. Falta só validar o auto-deploy (GitHub Actions) de ponta a ponta. Passo a passo em [DEPLOY.md](DEPLOY.md).
+- [ ] **Proteger o acesso (Cloudflare Access)** — login via Google (uso diário) + One-Time PIN por e-mail (fallback, e forma de liberar acesso pontual pra alguém sem precisar mexer no app). Tudo configurado no painel da Cloudflare, sem código. Passo a passo em [DEPLOY.md](DEPLOY.md#8-proteger-o-acesso-cloudflare-access).
 
 ## Próximas melhorias (confirmadas)
 
@@ -29,7 +30,6 @@ Lista de melhorias planejadas para o organizador pessoal. Conforme forem sendo u
 
 ## Ideias futuras (backlog, sem prioridade definida)
 
-- **Autenticação (login)** — proteger o acesso ao app. Prioridade baixa por enquanto: o app roda local/pessoal sem risco real de acesso indevido, e o esforço (usuários, sessão, proteger rotas no back e no front) é grande pro B.O. que resolve hoje.
 - Filtros na lista de tarefas (tag, responsável, status, prioridade) — hoje só busca por título
 - Ordenação customizável (prazo, prioridade, criação)
 - Visão Kanban por status
