@@ -1,0 +1,15 @@
+[Unit]
+Description=Organizador Pessoal (task organizer)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/organizator3000/server
+ExecStart=/usr/bin/node dist/index.js
+Environment=NODE_ENV=production
+Environment=PORT=4000
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

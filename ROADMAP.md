@@ -2,6 +2,14 @@
 
 Lista de melhorias planejadas para o organizador pessoal. Conforme forem sendo usadas e testadas no dia a dia, atualizamos esse arquivo (movendo pra "Feito" ou ajustando prioridade).
 
+## Bugs conhecidos
+
+- [ ] **Prazo no mesmo dia usa o horário atual** — em `DeadlineField.tsx`, ao escolher uma data no calendário o horário aplicado é sempre o horário atual (`now.getHours()/getMinutes()`). Ao definir o prazo pra hoje, o horário fica igual (ou passa a ser passado poucos segundos depois), fazendo a tarefa parecer atrasada assim que é criada. Esperado: quando a data escolhida for hoje, aplicar o último horário do dia (23:59) em vez do horário atual.
+
+## Infraestrutura
+
+- [ ] **Hospedar o app na internet** — VPS Vultr (São Paulo, vc2-1c-1gb + backup automático) + domínio `ricardordrj.com` via Cloudflare + deploy automático a cada push na `main` (GitHub Actions). Passo a passo completo em [DEPLOY.md](DEPLOY.md).
+
 ## Próximas melhorias (confirmadas)
 
 - [ ] **Syntax highlighting nas respostas** — quando colar código em uma resposta de tarefa, exibir com destaque de sintaxe em vez de texto puro (hoje `TaskResponses`/`TaskAttachments` mostram só texto cru no preview de anexos de código).
@@ -9,6 +17,11 @@ Lista de melhorias planejadas para o organizador pessoal. Conforme forem sendo u
 - [ ] **Utilitários de dev**
   - [ ] Templates de tarefa para tipos recorrentes (bug, feature, etc.)
   - [ ] Atalho de teclado (Cmd/Ctrl+K) para criar tarefa rápida ou buscar
+- [ ] **Finanças pessoais** — módulo novo, fora do domínio de tarefas
+  - [ ] Contas a pagar (boletos, assinaturas) com lembrete antes do vencimento
+  - [ ] Assinaturas recorrentes (Netflix, Spotify, academia...) com total gasto por mês
+  - [ ] Controle de gastos por categoria (mercado, lazer, transporte)
+  - [ ] Metas de economia / reserva de emergência
 
 ## Em avaliação
 
@@ -16,6 +29,7 @@ Lista de melhorias planejadas para o organizador pessoal. Conforme forem sendo u
 
 ## Ideias futuras (backlog, sem prioridade definida)
 
+- **Autenticação (login)** — proteger o acesso ao app. Prioridade baixa por enquanto: o app roda local/pessoal sem risco real de acesso indevido, e o esforço (usuários, sessão, proteger rotas no back e no front) é grande pro B.O. que resolve hoje.
 - Filtros na lista de tarefas (tag, responsável, status, prioridade) — hoje só busca por título
 - Ordenação customizável (prazo, prioridade, criação)
 - Visão Kanban por status

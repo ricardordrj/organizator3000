@@ -1,0 +1,3 @@
+ricardordrj.com {
+	reverse_proxy localhost:4000
+}
