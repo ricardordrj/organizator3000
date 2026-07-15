@@ -47,4 +47,5 @@ export const historyActionLabels: Record<TaskHistoryAction, string> = {
   unblocked: 'Desbloqueada',
   edited: 'Editada',
   completed: 'Concluída',
+  responded: 'Resposta registrada',
 }

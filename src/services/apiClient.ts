@@ -10,9 +10,13 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const isFormData = init?.body instanceof FormData
   const res = await fetch(`${BASE_URL}${path}`, {
     ...init,
-    headers: init?.body !== undefined ? { 'Content-Type': 'application/json', ...init?.headers } : init?.headers,
+    headers:
+      init?.body !== undefined && !isFormData
+        ? { 'Content-Type': 'application/json', ...init?.headers }
+        : init?.headers,
   })
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
@@ -31,4 +35,5 @@ export const apiClient = {
   put: <T>(path: string, body?: unknown) =>
     request<T>(path, { method: 'PUT', body: body !== undefined ? JSON.stringify(body) : undefined }),
   delete: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
+  upload: <T>(path: string, formData: FormData) => request<T>(path, { method: 'POST', body: formData }),
 }

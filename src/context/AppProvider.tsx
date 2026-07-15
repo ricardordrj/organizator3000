@@ -1,8 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
+import { Loader2Icon } from 'lucide-react'
 import { useAppStore } from '@/store/useAppStore'
 import { AppContext } from './appContext'
 import type { AppContextValue } from './appContext'
+
+function AppLoader() {
+  return (
+    <div className="flex min-h-svh flex-col items-center justify-center gap-3 bg-background">
+      <Loader2Icon className="size-8 animate-spin text-primary" />
+      <p className="text-sm text-muted-foreground">Carregando...</p>
+    </div>
+  )
+}
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const hydrate = useAppStore((state) => state.hydrate)
@@ -32,12 +42,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   return (
     <AppContext.Provider value={value}>
-      {isServerUnreachable && (
-        <div className="bg-destructive px-4 py-2 text-center text-sm text-white">
-          Não foi possível conectar ao servidor. Verifique se ele está rodando.
-        </div>
+      {!isHydrated && !isServerUnreachable ? (
+        <AppLoader />
+      ) : (
+        <>
+          {isServerUnreachable && (
+            <div className="bg-destructive px-4 py-2 text-center text-sm text-white">
+              Não foi possível conectar ao servidor. Verifique se ele está rodando.
+            </div>
+          )}
+          {children}
+        </>
       )}
-      {children}
     </AppContext.Provider>
   )
 }

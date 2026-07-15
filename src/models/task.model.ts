@@ -1,6 +1,20 @@
 import { z } from 'zod'
 import { baseEntitySchema } from './common.model'
-import { taskPersonSchema, taskTagSchema } from './taskOptions'
+import { taskAttachmentSchema } from './attachment.model'
+import { taskResponseSchema } from './response.model'
+
+export const taskPersonRefSchema = z.object({
+  id: z.uuid(),
+  name: z.string(),
+})
+export type TaskPersonRef = z.infer<typeof taskPersonRefSchema>
+
+export const taskTagRefSchema = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  color: z.string().optional(),
+})
+export type TaskTagRef = z.infer<typeof taskTagRefSchema>
 
 export const taskPrioritySchema = z.enum(['low', 'medium', 'high'])
 export type TaskPriority = z.infer<typeof taskPrioritySchema>
@@ -29,6 +43,7 @@ export const taskLinkSchema = z.object({
 })
 export type TaskLink = z.infer<typeof taskLinkSchema>
 
+
 export const taskHistoryActionSchema = z.enum([
   'created',
   'status_changed',
@@ -38,6 +53,7 @@ export const taskHistoryActionSchema = z.enum([
   'unblocked',
   'edited',
   'completed',
+  'responded',
 ])
 export type TaskHistoryAction = z.infer<typeof taskHistoryActionSchema>
 
@@ -70,12 +86,14 @@ export const fullTaskSchema = baseEntitySchema.extend({
   kind: z.literal('full'),
   ...taskSharedFields,
   description: z.string().default(''),
-  assignee: taskPersonSchema.optional(),
-  reporter: taskPersonSchema.optional(),
+  assignee: taskPersonRefSchema.optional(),
+  reporter: taskPersonRefSchema.optional(),
   estimatedHours: z.coerce.number().min(0).optional(),
-  tags: z.array(taskTagSchema).default([]),
+  tags: z.array(taskTagRefSchema).default([]),
   externalRef: z.string().optional(),
   links: z.array(taskLinkSchema).default([]),
+  attachments: z.array(taskAttachmentSchema).default([]),
+  responses: z.array(taskResponseSchema).default([]),
 })
 export type FullTask = z.infer<typeof fullTaskSchema>
 
@@ -96,10 +114,10 @@ export const createFullTaskInputSchema = z.object({
   priority: taskPrioritySchema,
   deadline: z.coerce.date().optional(),
   description: z.string().optional(),
-  assignee: taskPersonSchema.optional(),
-  reporter: taskPersonSchema.optional(),
+  assigneeId: z.string().optional(),
+  reporterId: z.string().optional(),
   estimatedHours: z.coerce.number().min(0).optional(),
-  tags: z.array(taskTagSchema).optional(),
+  tagIds: z.array(z.string()).optional(),
   externalRef: z.string().optional(),
   links: z.array(taskLinkSchema).optional(),
 })
@@ -118,10 +136,10 @@ export const updateTaskInputSchema = z.object({
   deadline: z.coerce.date().optional(),
   timeSpentHours: z.coerce.number().min(0).optional(),
   description: z.string().optional(),
-  assignee: taskPersonSchema.optional(),
-  reporter: taskPersonSchema.optional(),
+  assigneeId: z.string().optional(),
+  reporterId: z.string().optional(),
   estimatedHours: z.coerce.number().min(0).optional(),
-  tags: z.array(taskTagSchema).optional(),
+  tagIds: z.array(z.string()).optional(),
   externalRef: z.string().optional(),
   links: z.array(taskLinkSchema).optional(),
   changeReason: z.string().optional(),

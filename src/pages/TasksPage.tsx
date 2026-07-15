@@ -1,18 +1,25 @@
 import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { PlusIcon } from 'lucide-react'
+import { toast } from 'sonner'
 import { useTasks, useDebouncedValue } from '@/hooks'
+import { ApiError } from '@/services/apiClient'
 import { Input } from '@/components/ui/input'
-import { CreateTaskForm } from '@/components/tasks/CreateTaskForm'
+import { Button } from '@/components/ui/button'
+import { TaskFormDialog } from '@/components/tasks/TaskFormDialog'
 import { TaskListItem } from '@/components/tasks/TaskListItem'
-import { TaskDetailsDialog } from '@/components/tasks/TaskDetailsDialog'
 import { ConfirmCompleteDialog } from '@/components/tasks/ConfirmCompleteDialog'
+import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 
 export function TasksPage() {
-  const { tasks, editTask, blockTask, unblockTask, completeTask, removeTask } = useTasks()
+  const navigate = useNavigate()
+  const { tasks, completeTask, removeTask } = useTasks()
   const [search, setSearch] = useState('')
   const debouncedSearch = useDebouncedValue(search)
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
-  const [detailsId, setDetailsId] = useState<string | null>(null)
+  const [createOpen, setCreateOpen] = useState(false)
   const [completeId, setCompleteId] = useState<string | null>(null)
+  const [removeId, setRemoveId] = useState<string | null>(null)
 
   const filteredTasks = useMemo(
     () =>
@@ -20,8 +27,30 @@ export function TasksPage() {
     [tasks, debouncedSearch],
   )
 
-  const detailsTask = tasks.find(({ task }) => task.id === detailsId)?.task ?? null
   const completeTaskTarget = tasks.find(({ task }) => task.id === completeId)?.task ?? null
+  const removeTaskTarget = tasks.find(({ task }) => task.id === removeId)?.task ?? null
+
+  async function handleComplete() {
+    if (!completeTaskTarget) return
+    try {
+      await completeTask(completeTaskTarget.id)
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Erro ao concluir a tarefa')
+    } finally {
+      setCompleteId(null)
+    }
+  }
+
+  async function handleRemove() {
+    if (!removeTaskTarget) return
+    try {
+      await removeTask(removeTaskTarget.id)
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Erro ao remover a tarefa')
+    } finally {
+      setRemoveId(null)
+    }
+  }
 
   function toggleExpand(id: string) {
     setExpandedIds((prev) => {
@@ -34,9 +63,13 @@ export function TasksPage() {
 
   return (
     <section className="space-y-6">
-      <h2 className="text-xl font-semibold">Tarefas</h2>
-
-      <CreateTaskForm />
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-xl font-semibold">Tarefas</h2>
+        <Button onClick={() => setCreateOpen(true)}>
+          <PlusIcon className="size-4" />
+          Nova tarefa
+        </Button>
+      </div>
 
       <Input
         type="search"
@@ -53,9 +86,9 @@ export function TasksPage() {
             urgency={urgency}
             expanded={expandedIds.has(task.id)}
             onToggleExpand={() => toggleExpand(task.id)}
-            onOpenDetails={() => setDetailsId(task.id)}
+            onOpenDetails={() => navigate(`/tasks/${task.id}`)}
             onOpenComplete={() => setCompleteId(task.id)}
-            onRemove={() => removeTask(task.id)}
+            onRemove={() => setRemoveId(task.id)}
           />
         ))}
         {filteredTasks.length === 0 && (
@@ -63,27 +96,25 @@ export function TasksPage() {
         )}
       </ul>
 
-      <TaskDetailsDialog
-        task={detailsTask}
-        onOpenChange={(open) => {
-          if (!open) setDetailsId(null)
-        }}
-        onSave={(patch) => detailsTask && editTask(detailsTask.id, patch)}
-        onBlock={(reason) => detailsTask && blockTask(detailsTask.id, reason)}
-        onUnblock={() => detailsTask && unblockTask(detailsTask.id)}
-        onOpenComplete={() => detailsTask && setCompleteId(detailsTask.id)}
-      />
+      <TaskFormDialog mode="create" open={createOpen} onOpenChange={setCreateOpen} />
 
       <ConfirmCompleteDialog
         task={completeTaskTarget}
         onOpenChange={(open) => {
           if (!open) setCompleteId(null)
         }}
-        onConfirm={() => {
-          if (!completeTaskTarget) return
-          completeTask(completeTaskTarget.id)
-          setCompleteId(null)
+        onConfirm={handleComplete}
+      />
+
+      <ConfirmDialog
+        open={removeTaskTarget != null}
+        onOpenChange={(open) => {
+          if (!open) setRemoveId(null)
         }}
+        title="Remover tarefa"
+        description={`Tem certeza que deseja remover "${removeTaskTarget?.title}"? Esta ação também apaga anexos, respostas e histórico.`}
+        confirmLabel="Remover"
+        onConfirm={handleRemove}
       />
     </section>
   )

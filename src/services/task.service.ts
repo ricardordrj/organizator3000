@@ -8,6 +8,11 @@ export const taskService = {
     return raw.map((t) => taskSchema.parse(t))
   },
 
+  async get(id: string): Promise<Task | undefined> {
+    const raw = await apiClient.get<unknown>(`/tasks/${id}`)
+    return taskSchema.parse(raw)
+  },
+
   async create(input: CreateTaskInput): Promise<Task> {
     const raw = await apiClient.post<unknown>('/tasks', input)
     return taskSchema.parse(raw)

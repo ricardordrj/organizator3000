@@ -1,7 +1,9 @@
 import { useState } from 'react'
-import { AlertTriangleIcon } from 'lucide-react'
-import { useNotes, useTasks } from '@/hooks'
+import { AlertTriangleIcon, BanIcon, ClockIcon, ListTodoIcon } from 'lucide-react'
+import { toast } from 'sonner'
+import { useTasks } from '@/hooks'
 import type { Task } from '@/models'
+import { ApiError } from '@/services/apiClient'
 import { formatTimeRemaining } from '@/utils/date.utils'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -9,7 +11,6 @@ import { RescheduleDeadlineDialog } from '@/components/tasks/RescheduleDeadlineD
 
 export function DashboardPage() {
   const { tasks, editTask } = useTasks()
-  const { notes } = useNotes()
   const [rescheduleTask, setRescheduleTask] = useState<Task | null>(null)
 
   const pendingCount = tasks.filter(({ task }) => task.status !== 'done').length
@@ -18,17 +19,21 @@ export function DashboardPage() {
   const warningTasks = tasks.filter(({ urgency }) => urgency.level === 'warning')
 
   const stats = [
-    { label: 'Tarefas', value: tasks.length },
-    { label: 'Pendentes', value: pendingCount },
-    { label: 'Atrasadas', value: overdueTasks.length },
-    { label: 'Bloqueadas', value: blockedCount },
-    { label: 'Notas', value: notes.length },
+    { label: 'Tarefas', value: tasks.length, icon: ListTodoIcon },
+    { label: 'Pendentes', value: pendingCount, icon: ClockIcon },
+    { label: 'Atrasadas', value: overdueTasks.length, icon: AlertTriangleIcon },
+    { label: 'Bloqueadas', value: blockedCount, icon: BanIcon },
   ]
 
-  function handleReschedule(newDeadline: Date, justification: string) {
+  async function handleReschedule(newDeadline: Date, justification: string) {
     if (!rescheduleTask) return
-    editTask(rescheduleTask.id, { deadline: newDeadline, changeReason: justification })
-    setRescheduleTask(null)
+    try {
+      await editTask(rescheduleTask.id, { deadline: newDeadline, changeReason: justification })
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Erro ao adiar o prazo')
+    } finally {
+      setRescheduleTask(null)
+    }
   }
 
   return (
@@ -87,11 +92,14 @@ export function DashboardPage() {
         </Card>
       )}
 
-      <div className="grid grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {stats.map((stat) => (
           <Card key={stat.label}>
             <CardHeader>
-              <CardTitle className="text-3xl">{stat.value}</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-3xl">{stat.value}</CardTitle>
+                <stat.icon className="size-5 text-primary" />
+              </div>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground">{stat.label}</CardContent>
           </Card>

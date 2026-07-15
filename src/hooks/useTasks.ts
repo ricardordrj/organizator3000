@@ -17,6 +17,10 @@ export function useTasks() {
   const unblockTask = useAppStore((state) => state.unblockTask)
   const completeTask = useAppStore((state) => state.completeTask)
   const removeTask = useAppStore((state) => state.removeTask)
+  const uploadAttachment = useAppStore((state) => state.uploadAttachment)
+  const removeAttachment = useAppStore((state) => state.removeAttachment)
+  const addResponse = useAppStore((state) => state.addResponse)
+  const removeResponse = useAppStore((state) => state.removeResponse)
 
   const sortedTasks = useMemo<TaskWithUrgency[]>(() => {
     const withUrgency = tasks.map((task) => ({
@@ -26,5 +30,17 @@ export function useTasks() {
     return withUrgency.sort((a, b) => compareTaskUrgency(a.urgency, b.urgency))
   }, [tasks])
 
-  return { tasks: sortedTasks, addTask, editTask, blockTask, unblockTask, completeTask, removeTask }
+  return {
+    tasks: sortedTasks,
+    addTask,
+    editTask,
+    blockTask,
+    unblockTask,
+    completeTask,
+    removeTask,
+    uploadAttachment,
+    removeAttachment,
+    addResponse,
+    removeResponse,
+  }
 }

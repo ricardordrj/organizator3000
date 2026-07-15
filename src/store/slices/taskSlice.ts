@@ -1,5 +1,5 @@
 import type { StateCreator } from 'zustand'
-import { taskService } from '@/services'
+import { taskService, attachmentService, responseService } from '@/services'
 import type { AppState, TaskSlice } from '../types'
 
 export const createTaskSlice: StateCreator<AppState, [], [], TaskSlice> = (set, get) => ({
@@ -7,6 +7,7 @@ export const createTaskSlice: StateCreator<AppState, [], [], TaskSlice> = (set, 
   addTask: async (input) => {
     const task = await taskService.create(input)
     set({ tasks: [...get().tasks, task] })
+    return task
   },
   editTask: async (id, patch) => {
     const updated = await taskService.update(id, patch)
@@ -31,5 +32,31 @@ export const createTaskSlice: StateCreator<AppState, [], [], TaskSlice> = (set, 
   removeTask: async (id) => {
     await taskService.remove(id)
     set({ tasks: get().tasks.filter((task) => task.id !== id) })
+  },
+  uploadAttachment: async (taskId, file, responseId) => {
+    await attachmentService.upload(taskId, file, responseId)
+    const updated = await taskService.get(taskId)
+    if (!updated) return
+    set({ tasks: get().tasks.map((task) => (task.id === taskId ? updated : task)) })
+  },
+  removeAttachment: async (taskId, attachmentId) => {
+    await attachmentService.remove(attachmentId)
+    const updated = await taskService.get(taskId)
+    if (!updated) return
+    set({ tasks: get().tasks.map((task) => (task.id === taskId ? updated : task)) })
+  },
+  addResponse: async (taskId, message) => {
+    const response = await responseService.create(taskId, { message })
+    const updated = await taskService.get(taskId)
+    if (updated) {
+      set({ tasks: get().tasks.map((task) => (task.id === taskId ? updated : task)) })
+    }
+    return response
+  },
+  removeResponse: async (taskId, responseId) => {
+    await responseService.remove(responseId)
+    const updated = await taskService.get(taskId)
+    if (!updated) return
+    set({ tasks: get().tasks.map((task) => (task.id === taskId ? updated : task)) })
   },
 })

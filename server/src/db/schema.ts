@@ -1,6 +1,21 @@
 import { sqliteTable, text, integer, real, uniqueIndex, index } from 'drizzle-orm/sqlite-core'
 import { relations } from 'drizzle-orm'
 
+// ---------- people (devs/POs — Fase D) ----------
+export const people = sqliteTable(
+  'people',
+  {
+    id: text('id').primaryKey(),
+    name: text('name').notNull(),
+    role: text('role', { enum: ['dev', 'po'] }).notNull(),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+    updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
+  },
+  (t) => ({
+    nameUnique: uniqueIndex('people_name_unique').on(t.name),
+  }),
+)
+
 // ---------- tasks ----------
 export const tasks = sqliteTable(
   'tasks',
@@ -22,16 +37,13 @@ export const tasks = sqliteTable(
 
     // full-only fields (nullable on simple rows)
     description: text('description'),
-    assignee: text('assignee'),
-    reporter: text('reporter'),
+    assigneeId: text('assignee_id').references(() => people.id, { onDelete: 'restrict' }),
+    reporterId: text('reporter_id').references(() => people.id, { onDelete: 'restrict' }),
     estimatedHours: real('estimated_hours'),
     externalRef: text('external_ref'),
     linksJson: text('links_json', { mode: 'json' }).$type<
       { id: string; label?: string; url: string }[]
     >(),
-    // Fase A: tags continuam como lista fechada (mesma semântica do front hoje).
-    // Migra para a relação tags/task_tags quando a Fase D construir a tela de admin.
-    tagsJson: text('tags_json', { mode: 'json' }).$type<string[]>(),
 
     createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
     updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
@@ -160,16 +172,6 @@ export const taskTags = sqliteTable(
   }),
 )
 
-// ---------- notes ----------
-export const notes = sqliteTable('notes', {
-  id: text('id').primaryKey(),
-  title: text('title').notNull(),
-  content: text('content').notNull().default(''),
-  tagsJson: text('tags_json', { mode: 'json' }).$type<string[]>().notNull(),
-  createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
-  updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
-})
-
 // ---------- settings (linha única, id=1, sem auth) ----------
 export const settings = sqliteTable('settings', {
   id: integer('id').primaryKey(),
@@ -183,12 +185,22 @@ export const settings = sqliteTable('settings', {
 })
 
 // ---------- relations ----------
-export const tasksRelations = relations(tasks, ({ many }) => ({
+export const tasksRelations = relations(tasks, ({ many, one }) => ({
   blockRecords: many(blockRecords),
   historyEntries: many(historyEntries),
   responses: many(responses),
   attachments: many(attachments),
   taskTags: many(taskTags),
+  assigneePerson: one(people, {
+    fields: [tasks.assigneeId],
+    references: [people.id],
+    relationName: 'task_assignee',
+  }),
+  reporterPerson: one(people, {
+    fields: [tasks.reporterId],
+    references: [people.id],
+    relationName: 'task_reporter',
+  }),
 }))
 
 export const blockRecordsRelations = relations(blockRecords, ({ one }) => ({

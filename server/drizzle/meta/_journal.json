@@ -15,6 +15,27 @@
       "when": 1784057021823,
       "tag": "0001_real_emma_frost",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1784067631551,
+      "tag": "0002_overconfident_starfox",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1784067848622,
+      "tag": "0003_pink_morg",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1784077851276,
+      "tag": "0004_lively_forge",
+      "breakpoints": true
     }
   ]
 }

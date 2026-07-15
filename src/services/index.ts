@@ -1,3 +1,6 @@
 export * from './task.service'
-export * from './note.service'
 export * from './settings.service'
+export * from './attachment.service'
+export * from './person.service'
+export * from './tag.service'
+export * from './response.service'

@@ -126,13 +126,11 @@ function FormMessage({ className, children, ...props }: React.ComponentProps<"p"
   const { error, formMessageId } = useFormField()
   const body = error ? String(error?.message ?? "") : children
 
-  if (!body) return null
-
   return (
     <p
       data-slot="form-message"
       id={formMessageId}
-      className={cn("text-destructive text-sm", className)}
+      className={cn("min-h-[1.25rem] text-destructive text-sm", className)}
       {...props}
     >
       {body}

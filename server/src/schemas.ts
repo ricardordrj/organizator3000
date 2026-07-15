@@ -29,10 +29,10 @@ export const createTaskInputSchema = z.discriminatedUnion('kind', [
     kind: z.literal('full'),
     ...sharedCreateFields,
     description: z.string().optional(),
-    assignee: z.string().optional(),
-    reporter: z.string().optional(),
+    assigneeId: z.string().optional(),
+    reporterId: z.string().optional(),
     estimatedHours: z.coerce.number().min(0).optional(),
-    tags: z.array(z.string()).optional(),
+    tagIds: z.array(z.string()).optional(),
     externalRef: z.string().optional(),
     links: z.array(taskLinkSchema).optional(),
   }),
@@ -46,33 +46,49 @@ export const updateTaskInputSchema = z.object({
   deadline: z.coerce.date().optional(),
   timeSpentHours: z.coerce.number().min(0).optional(),
   description: z.string().optional(),
-  assignee: z.string().optional(),
-  reporter: z.string().optional(),
+  assigneeId: z.string().optional(),
+  reporterId: z.string().optional(),
   estimatedHours: z.coerce.number().min(0).optional(),
-  tags: z.array(z.string()).optional(),
+  tagIds: z.array(z.string()).optional(),
   externalRef: z.string().optional(),
   links: z.array(taskLinkSchema).optional(),
   changeReason: z.string().optional(),
 })
 export type UpdateTaskInput = z.infer<typeof updateTaskInputSchema>
 
+export const personRoleSchema = z.enum(['dev', 'po'])
+
+export const createPersonInputSchema = z.object({
+  name: z.string().min(1, 'Nome é obrigatório'),
+  role: personRoleSchema,
+})
+export type CreatePersonInput = z.infer<typeof createPersonInputSchema>
+
+export const updatePersonInputSchema = z.object({
+  name: z.string().min(1).optional(),
+})
+export type UpdatePersonInput = z.infer<typeof updatePersonInputSchema>
+
+export const createTagInputSchema = z.object({
+  name: z.string().min(1, 'Nome é obrigatório'),
+  color: z.string().optional(),
+})
+export type CreateTagInput = z.infer<typeof createTagInputSchema>
+
+export const updateTagInputSchema = z.object({
+  name: z.string().min(1).optional(),
+  color: z.string().optional(),
+})
+export type UpdateTagInput = z.infer<typeof updateTagInputSchema>
+
 export const blockTaskInputSchema = z.object({
   reason: z.string().min(1, 'Informe o motivo do bloqueio'),
 })
 
-export const createNoteInputSchema = z.object({
-  title: z.string().min(1, 'Título é obrigatório'),
-  content: z.string().optional(),
-  tags: z.array(z.string()).optional(),
+export const createResponseInputSchema = z.object({
+  message: z.string().min(1, 'Mensagem é obrigatória'),
 })
-export type CreateNoteInput = z.infer<typeof createNoteInputSchema>
-
-export const updateNoteInputSchema = z.object({
-  title: z.string().min(1).optional(),
-  content: z.string().optional(),
-  tags: z.array(z.string()).optional(),
-})
-export type UpdateNoteInput = z.infer<typeof updateNoteInputSchema>
+export type CreateResponseInput = z.infer<typeof createResponseInputSchema>
 
 export const settingsInputSchema = z.object({
   theme: z.enum(['light', 'dark', 'system']),

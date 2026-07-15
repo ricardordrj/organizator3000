@@ -1,30 +1,39 @@
-import { TASK_TAGS } from '@/models'
-import type { TaskTag } from '@/models'
+import { useTags } from '@/hooks'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import { resolveTagColorClass } from '@/lib/tagColors'
 
 interface TagPickerProps {
-  value: TaskTag[]
-  onChange: (tags: TaskTag[]) => void
+  value: string[]
+  onChange: (tagIds: string[]) => void
 }
 
 export function TagPicker({ value, onChange }: TagPickerProps) {
-  function toggle(tag: TaskTag) {
-    if (value.includes(tag)) onChange(value.filter((current) => current !== tag))
-    else onChange([...value, tag])
+  const { tags } = useTags()
+
+  function toggle(tagId: string) {
+    if (value.includes(tagId)) onChange(value.filter((current) => current !== tagId))
+    else onChange([...value, tagId])
+  }
+
+  if (tags.length === 0) {
+    return <p className="text-sm text-muted-foreground">Nenhuma tag cadastrada ainda.</p>
   }
 
   return (
     <div className="flex flex-wrap gap-1.5">
-      {TASK_TAGS.map((tag) => {
-        const selected = value.includes(tag)
+      {tags.map((tag) => {
+        const selected = value.includes(tag.id)
         return (
-          <button key={tag} type="button" onClick={() => toggle(tag)}>
+          <button key={tag.id} type="button" onClick={() => toggle(tag.id)}>
             <Badge
-              variant={selected ? 'default' : 'outline'}
-              className={cn('cursor-pointer select-none', !selected && 'text-muted-foreground')}
+              variant={selected ? undefined : 'outline'}
+              className={cn(
+                'cursor-pointer select-none',
+                selected ? resolveTagColorClass(tag.color) : 'text-muted-foreground',
+              )}
             >
-              {tag}
+              {tag.name}
             </Badge>
           </button>
         )
