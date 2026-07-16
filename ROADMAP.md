@@ -4,8 +4,7 @@ Lista de melhorias planejadas para o organizador pessoal. Conforme forem sendo u
 
 ## Bugs conhecidos
 
-- [ ] **Prazo no mesmo dia usa o horário atual** — em `DeadlineField.tsx`, ao escolher uma data no calendário o horário aplicado é sempre o horário atual (`now.getHours()/getMinutes()`). Ao definir o prazo pra hoje, o horário fica igual (ou passa a ser passado poucos segundos depois), fazendo a tarefa parecer atrasada assim que é criada. Esperado: quando a data escolhida for hoje, aplicar o último horário do dia (23:59) em vez do horário atual.
-- [ ] **Diálogos podem ficar presos na animação de fechar** — todo `Dialog` do app (`components/ui/dialog.tsx`, base-ui) espera a animação CSS de saída terminar antes de desmontar. Em teste automatizado (navegador headless, `prefers-reduced-motion: reduce` forçado) essa animação ficou congelada em `currentTime: 0` e o diálogo nunca fechou sozinho após salvar — reproduzido tanto no `TaskFormDialog` (já existente) quanto nos novos diálogos de finanças, então não é regressão do módulo novo. Provavelmente é artefato do ambiente de teste (aba em segundo plano/throttling), não reproduzido no uso normal até agora — mas vale prestar atenção caso algum dia um diálogo "não feche" de verdade pra você, principalmente se usar "reduzir movimento" nas configurações do sistema/navegador.
+Nenhum em aberto no momento.
 
 ## Infraestrutura
 
@@ -38,6 +37,8 @@ Lista de melhorias planejadas para o organizador pessoal. Conforme forem sendo u
 
 ## Feito
 
+- **Prazo no mesmo dia usa o horário atual** — corrigido em `DeadlineField.tsx`: quando a data escolhida no calendário é hoje, aplica 23:59:59 em vez do horário atual (evitava a tarefa nascer "quase atrasada"). Testado selecionando o dia atual e conferindo o horário exibido.
+- **Diálogos podem ficar presos na animação de fechar** — causa raiz confirmada: em aba com `document.hidden = true` (segundo plano), o navegador para de disparar `requestAnimationFrame`, e o base-ui depende disso pra detectar o fim da animação de saída e desmontar o diálogo. É um comportamento do navegador pra abas em background, não um bug do app — numa aba em foco (uso normal) isso não acontece. Mesmo assim, adicionei uma proteção defensiva: com `prefers-reduced-motion: reduce` ativo, a animação do diálogo é removida completamente (`animation: none`), então não há animação pra "travar" nesse caso específico.
 - **Redesign visual cyberpunk x Dark Souls** — paleta ciano/magenta/dourado ("ember"), fonte Orbitron nos títulos, glow em cards e botões, scanlines sutis, nav mobile com menu hambúrguer. Testado em 375px sem overflow horizontal.
 - **Renda e vale alimentação** — cadastro de salário e outras rendas mensais; vale alimentação funciona como saldo (renda cadastrada menos compras do mês). Despesa rápida de supermercado com descrição obrigatória (o que foi comprado), descontada automaticamente do saldo do vale. Resumo mensal expandido: renda total, gasto total, saldo do mês e saldo do vale, tudo em `/financas`.
 - **Finanças pessoais** — tela `/financas` nova, fora do domínio de tarefas: contas a pagar e assinaturas recorrentes (com "marcar como pago" por ciclo mensal), total gasto por mês, gasto por categoria, e metas de economia com barra de progresso e contribuições. Testado localmente e já em produção (`ricardordrj.com`).

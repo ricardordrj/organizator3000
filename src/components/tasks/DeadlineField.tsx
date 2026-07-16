@@ -1,4 +1,4 @@
-import { format } from 'date-fns'
+import { format, isSameDay } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { ptBR as ptBRCalendar } from 'react-day-picker/locale'
 import { CalendarIcon } from 'lucide-react'
@@ -21,7 +21,11 @@ export function DeadlineField({ value, onChange, placeholder = 'Selecionar prazo
     }
     const now = new Date()
     const next = new Date(date)
-    next.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), 0)
+    if (isSameDay(date, now)) {
+      next.setHours(23, 59, 59, 999)
+    } else {
+      next.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), 0)
+    }
     onChange(next)
   }
 

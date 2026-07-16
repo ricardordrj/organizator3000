@@ -217,3 +217,19 @@
 [data-slot="button"].bg-primary:hover {
   box-shadow: 0 0 18px -1px oklch(from var(--primary) l c h / 55%);
 }
+
+/*
+ * base-ui's Dialog/Popover wait for the CSS open/close animation to actually
+ * finish (via Element.getAnimations()) before unmounting. If that animation
+ * ever gets stuck (observed under prefers-reduced-motion in headless/throttled
+ * tabs), the dialog never closes. Removing the animation entirely under
+ * reduced-motion means getAnimations() returns nothing, so it resolves
+ * immediately instead of waiting on a wedged animation.
+ */
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="dialog-content"],
+  [data-slot="dialog-overlay"],
+  [data-slot="popover-content"] {
+    animation: none !important;
+  }
+}
