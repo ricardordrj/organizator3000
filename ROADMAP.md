@@ -4,7 +4,7 @@ Lista de melhorias planejadas para o organizador pessoal. Conforme forem sendo u
 
 ## Bugs conhecidos
 
-Nenhum em aberto no momento.
+- [ ] **Ícone do PWA aparece cinza com "R" no Android** — causa confirmada: o Cloudflare Access protege o domínio inteiro, inclusive `manifest.json` e `icon-192.png`/`icon-512.png`. Quem busca esses arquivos pra "instalar" o app não é o celular, é um servidor do Google, sem os cookies de login — então ele recebe um redirect (302) pra tela de login em vez do ícone de verdade, e o Android cai no ícone genérico (primeira letra do domínio). **Fix**: no painel Cloudflare, Zero Trust → Access → Applications, criar uma Application nova cobrindo `ricardordrj.com/manifest.json`, `/icon-192.png` e `/icon-512.png` com política **Bypass** (libera só essas rotas, sem exigir login; o resto do site continua protegido normal). Depois de aplicar, desinstalar o atalho errado do celular e instalar de novo.
 
 ## Infraestrutura
 
