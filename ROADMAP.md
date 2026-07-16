@@ -38,7 +38,7 @@ Lista de melhorias planejadas para o organizador pessoal. Conforme forem sendo u
 
 ## Feito
 
-- **Finanças pessoais** — tela `/financas` nova, fora do domínio de tarefas: contas a pagar e assinaturas recorrentes (com "marcar como pago" por ciclo mensal), total gasto por mês, gasto por categoria, e metas de economia com barra de progresso e contribuições. Testado localmente (criar, editar, pagar, contribuir, remover) — falta rodar em produção depois do próximo deploy.
+- **Finanças pessoais** — tela `/financas` nova, fora do domínio de tarefas: contas a pagar e assinaturas recorrentes (com "marcar como pago" por ciclo mensal), total gasto por mês, gasto por categoria, e metas de economia com barra de progresso e contribuições. Testado localmente e já em produção (`ricardordrj.com`).
 - Anexos (imagens e código) em tarefas e respostas
 - Thread de respostas por tarefa
 - Cadastro de tags e pessoas (devs/POs)
