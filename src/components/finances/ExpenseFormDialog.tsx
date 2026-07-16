@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { toast } from 'sonner'
 import type { Expense } from '@/models'
 import { expenseCategorySchema, expenseKindSchema } from '@/models'
-import { useExpenses } from '@/hooks'
+import { useExpenses, useFinanceProfiles } from '@/hooks'
 import { ApiError } from '@/services/apiClient'
 import { parseCurrencyInputToCents } from '@/utils/currency.utils'
 import { Button } from '@/components/ui/button'
@@ -51,6 +51,7 @@ interface ExpenseFormDialogProps {
 
 export function ExpenseFormDialog({ expense, open, onOpenChange }: ExpenseFormDialogProps) {
   const { addExpense, editExpense } = useExpenses()
+  const { activeFinanceProfileId } = useFinanceProfiles()
   const [submitting, setSubmitting] = useState(false)
 
   const form = useForm<ExpenseFormValues>({
@@ -76,6 +77,11 @@ export function ExpenseFormDialog({ expense, open, onOpenChange }: ExpenseFormDi
       return
     }
 
+    if (!expense && !activeFinanceProfileId) {
+      toast.error('Selecione um perfil antes de criar a despesa')
+      return
+    }
+
     setSubmitting(true)
     try {
       const payload = {
@@ -89,7 +95,7 @@ export function ExpenseFormDialog({ expense, open, onOpenChange }: ExpenseFormDi
         await editExpense(expense.id, payload)
         toast.success('Despesa atualizada com sucesso')
       } else {
-        await addExpense(payload)
+        await addExpense({ ...payload, profileId: activeFinanceProfileId! })
         toast.success('Despesa criada com sucesso')
       }
       onOpenChange(false)

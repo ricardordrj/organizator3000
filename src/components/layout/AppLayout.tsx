@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { MenuIcon, XIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useTaskDeadlineNotifications } from '@/hooks'
 
 const navItems = [
   { to: '/', label: 'Dashboard', end: true },
@@ -41,6 +42,8 @@ function NavLinks({ onNavigate, vertical = false }: { onNavigate?: () => void; v
 export function AppLayout() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const location = useLocation()
+
+  useTaskDeadlineNotifications()
 
   useEffect(() => {
     setMobileOpen(false)

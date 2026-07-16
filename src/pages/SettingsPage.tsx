@@ -1,4 +1,5 @@
 import { useTheme } from '@/hooks'
+import { useAppStore } from '@/store/useAppStore'
 import type { Theme } from '@/models'
 import {
   Select,
@@ -8,11 +9,43 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 
 const themeLabels: Record<Theme, string> = {
   system: 'Sistema',
   light: 'Claro',
   dark: 'Escuro',
+}
+
+function NotificationsSetting() {
+  const notificationsEnabled = useAppStore((state) => state.notificationsEnabled)
+  const setNotificationsEnabled = useAppStore((state) => state.setNotificationsEnabled)
+  const isUnsupported = typeof Notification === 'undefined'
+  const isDenied = !isUnsupported && Notification.permission === 'denied'
+
+  return (
+    <div className="flex max-w-80 flex-col gap-2">
+      <div className="flex items-center gap-2">
+        <Checkbox
+          id="notifications-enabled"
+          checked={notificationsEnabled}
+          disabled={isUnsupported || isDenied}
+          onCheckedChange={(checked) => setNotificationsEnabled(checked === true)}
+        />
+        <Label htmlFor="notifications-enabled">Notificar prazos próximos e atrasados</Label>
+      </div>
+      {isUnsupported && (
+        <p className="text-xs text-muted-foreground">
+          Seu navegador não suporta notificações.
+        </p>
+      )}
+      {isDenied && (
+        <p className="text-xs text-muted-foreground">
+          Permissão de notificação bloqueada. Libere nas configurações do navegador pra ativar.
+        </p>
+      )}
+    </div>
+  )
 }
 
 export function SettingsPage() {
@@ -34,6 +67,7 @@ export function SettingsPage() {
           </SelectContent>
         </Select>
       </div>
+      <NotificationsSetting />
     </section>
   )
 }

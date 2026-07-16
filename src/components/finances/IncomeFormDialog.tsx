@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { toast } from 'sonner'
 import type { Income } from '@/models'
 import { incomeKindSchema } from '@/models'
-import { useIncomes } from '@/hooks'
+import { useIncomes, useFinanceProfiles } from '@/hooks'
 import { ApiError } from '@/services/apiClient'
 import { parseCurrencyInputToCents } from '@/utils/currency.utils'
 import { Button } from '@/components/ui/button'
@@ -45,6 +45,7 @@ interface IncomeFormDialogProps {
 
 export function IncomeFormDialog({ income, open, onOpenChange }: IncomeFormDialogProps) {
   const { addIncome, editIncome } = useIncomes()
+  const { activeFinanceProfileId } = useFinanceProfiles()
   const [submitting, setSubmitting] = useState(false)
 
   const form = useForm<IncomeFormValues>({
@@ -65,13 +66,23 @@ export function IncomeFormDialog({ income, open, onOpenChange }: IncomeFormDialo
       return
     }
 
+    if (!income && !activeFinanceProfileId) {
+      toast.error('Selecione um perfil antes de criar a renda')
+      return
+    }
+
     setSubmitting(true)
     try {
       if (income) {
         await editIncome(income.id, { description: values.description, amountCents, kind: values.kind })
         toast.success('Renda atualizada com sucesso')
       } else {
-        await addIncome({ description: values.description, amountCents, kind: values.kind })
+        await addIncome({
+          description: values.description,
+          amountCents,
+          kind: values.kind,
+          profileId: activeFinanceProfileId!,
+        })
         toast.success('Renda criada com sucesso')
       }
       onOpenChange(false)

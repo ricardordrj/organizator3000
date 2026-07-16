@@ -22,12 +22,19 @@ import type {
   UpdateIncomeInput,
   MealVoucherPurchase,
   CreateMealVoucherPurchaseInput,
+  FinanceProfile,
+  CreateFinanceProfileInput,
+  UpdateFinanceProfileInput,
 } from '@/models'
 
 export interface UiSlice {
   settings: AppSettings
   isHydrated: boolean
+  notificationsEnabled: boolean
+  activeFinanceProfileId: string | null
   setTheme: (theme: Theme) => Promise<void>
+  setNotificationsEnabled: (enabled: boolean) => Promise<void>
+  setActiveFinanceProfileId: (id: string | null) => void
 }
 
 export interface TaskSlice {
@@ -87,6 +94,13 @@ export interface MealVoucherPurchaseSlice {
   removeMealVoucherPurchase: (id: string) => Promise<void>
 }
 
+export interface FinanceProfileSlice {
+  financeProfiles: FinanceProfile[]
+  addFinanceProfile: (input: CreateFinanceProfileInput) => Promise<FinanceProfile>
+  editFinanceProfile: (id: string, patch: UpdateFinanceProfileInput) => Promise<void>
+  removeFinanceProfile: (id: string) => Promise<void>
+}
+
 export interface AppState
   extends UiSlice,
     TaskSlice,
@@ -95,6 +109,7 @@ export interface AppState
     ExpenseSlice,
     SavingsGoalSlice,
     IncomeSlice,
-    MealVoucherPurchaseSlice {
+    MealVoucherPurchaseSlice,
+    FinanceProfileSlice {
   hydrate: () => Promise<void>
 }

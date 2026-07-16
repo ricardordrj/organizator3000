@@ -11,6 +11,7 @@ import { attachmentRoutes } from './routes/attachments.routes.js'
 import { peopleRoutes } from './routes/people.routes.js'
 import { tagRoutes } from './routes/tags.routes.js'
 import { responseRoutes } from './routes/responses.routes.js'
+import { financeProfileRoutes } from './routes/financeProfiles.routes.js'
 import { expenseRoutes } from './routes/expenses.routes.js'
 import { savingsGoalRoutes } from './routes/savingsGoals.routes.js'
 import { incomeRoutes } from './routes/incomes.routes.js'
@@ -44,6 +45,7 @@ export function buildApp() {
   app.register(peopleRoutes, { prefix: '/api' })
   app.register(tagRoutes, { prefix: '/api' })
   app.register(responseRoutes, { prefix: '/api' })
+  app.register(financeProfileRoutes, { prefix: '/api' })
   app.register(expenseRoutes, { prefix: '/api' })
   app.register(savingsGoalRoutes, { prefix: '/api' })
   app.register(incomeRoutes, { prefix: '/api' })

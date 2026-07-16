@@ -172,11 +172,22 @@ export const taskTags = sqliteTable(
   }),
 )
 
+// ---------- finance_profiles (perfis isolados — Ricardo, mãe, etc.) ----------
+export const financeProfiles = sqliteTable('finance_profiles', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
+})
+
 // ---------- expenses (contas a pagar + assinaturas — Fase Finanças) ----------
 export const expenses = sqliteTable(
   'expenses',
   {
     id: text('id').primaryKey(),
+    profileId: text('profile_id')
+      .notNull()
+      .references(() => financeProfiles.id, { onDelete: 'restrict' }),
     description: text('description').notNull(),
     amountCents: integer('amount_cents').notNull(),
     category: text('category', {
@@ -191,24 +202,37 @@ export const expenses = sqliteTable(
   },
   (t) => ({
     categoryIdx: index('expenses_category_idx').on(t.category),
+    profileIdx: index('expenses_profile_idx').on(t.profileId),
   }),
 )
 
 // ---------- incomes (salário, vale alimentação etc. — Fase Finanças) ----------
-export const incomes = sqliteTable('incomes', {
-  id: text('id').primaryKey(),
-  description: text('description').notNull(),
-  amountCents: integer('amount_cents').notNull(),
-  kind: text('kind', { enum: ['salary', 'meal_voucher', 'other'] }).notNull(),
-  createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
-  updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
-})
+export const incomes = sqliteTable(
+  'incomes',
+  {
+    id: text('id').primaryKey(),
+    profileId: text('profile_id')
+      .notNull()
+      .references(() => financeProfiles.id, { onDelete: 'restrict' }),
+    description: text('description').notNull(),
+    amountCents: integer('amount_cents').notNull(),
+    kind: text('kind', { enum: ['salary', 'meal_voucher', 'other'] }).notNull(),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+    updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
+  },
+  (t) => ({
+    profileIdx: index('incomes_profile_idx').on(t.profileId),
+  }),
+)
 
 // ---------- meal_voucher_purchases (gasto rápido de supermercado, descontado do vale — Fase Finanças) ----------
 export const mealVoucherPurchases = sqliteTable(
   'meal_voucher_purchases',
   {
     id: text('id').primaryKey(),
+    profileId: text('profile_id')
+      .notNull()
+      .references(() => financeProfiles.id, { onDelete: 'restrict' }),
     description: text('description').notNull(),
     amountCents: integer('amount_cents').notNull(),
     purchasedAt: integer('purchased_at', { mode: 'timestamp_ms' }).notNull(),
@@ -216,19 +240,29 @@ export const mealVoucherPurchases = sqliteTable(
   },
   (t) => ({
     purchasedAtIdx: index('meal_voucher_purchases_purchased_at_idx').on(t.purchasedAt),
+    profileIdx: index('meal_voucher_purchases_profile_idx').on(t.profileId),
   }),
 )
 
 // ---------- savings_goals (metas de economia — Fase Finanças) ----------
-export const savingsGoals = sqliteTable('savings_goals', {
-  id: text('id').primaryKey(),
-  name: text('name').notNull(),
-  targetCents: integer('target_cents').notNull(),
-  currentCents: integer('current_cents').notNull().default(0),
-  deadline: integer('deadline', { mode: 'timestamp_ms' }),
-  createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
-  updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
-})
+export const savingsGoals = sqliteTable(
+  'savings_goals',
+  {
+    id: text('id').primaryKey(),
+    profileId: text('profile_id')
+      .notNull()
+      .references(() => financeProfiles.id, { onDelete: 'restrict' }),
+    name: text('name').notNull(),
+    targetCents: integer('target_cents').notNull(),
+    currentCents: integer('current_cents').notNull().default(0),
+    deadline: integer('deadline', { mode: 'timestamp_ms' }),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+    updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
+  },
+  (t) => ({
+    profileIdx: index('savings_goals_profile_idx').on(t.profileId),
+  }),
+)
 
 // ---------- settings (linha única, id=1, sem auth) ----------
 export const settings = sqliteTable('settings', {
@@ -286,4 +320,27 @@ export const tagsRelations = relations(tags, ({ many }) => ({
 export const taskTagsRelations = relations(taskTags, ({ one }) => ({
   task: one(tasks, { fields: [taskTags.taskId], references: [tasks.id] }),
   tag: one(tags, { fields: [taskTags.tagId], references: [tags.id] }),
+}))
+
+export const financeProfilesRelations = relations(financeProfiles, ({ many }) => ({
+  expenses: many(expenses),
+  incomes: many(incomes),
+  mealVoucherPurchases: many(mealVoucherPurchases),
+  savingsGoals: many(savingsGoals),
+}))
+
+export const expensesRelations = relations(expenses, ({ one }) => ({
+  profile: one(financeProfiles, { fields: [expenses.profileId], references: [financeProfiles.id] }),
+}))
+
+export const incomesRelations = relations(incomes, ({ one }) => ({
+  profile: one(financeProfiles, { fields: [incomes.profileId], references: [financeProfiles.id] }),
+}))
+
+export const mealVoucherPurchasesRelations = relations(mealVoucherPurchases, ({ one }) => ({
+  profile: one(financeProfiles, { fields: [mealVoucherPurchases.profileId], references: [financeProfiles.id] }),
+}))
+
+export const savingsGoalsRelations = relations(savingsGoals, ({ one }) => ({
+  profile: one(financeProfiles, { fields: [savingsGoals.profileId], references: [financeProfiles.id] }),
 }))

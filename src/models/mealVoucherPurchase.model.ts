@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 export const mealVoucherPurchaseSchema = z.object({
   id: z.uuid(),
+  profileId: z.uuid(),
   description: z.string().min(1, 'Descrição é obrigatória'),
   amountCents: z.number().int().positive(),
   purchasedAt: z.coerce.date(),
@@ -10,6 +11,7 @@ export const mealVoucherPurchaseSchema = z.object({
 export type MealVoucherPurchase = z.infer<typeof mealVoucherPurchaseSchema>
 
 export const createMealVoucherPurchaseInputSchema = z.object({
+  profileId: z.uuid(),
   description: z.string().min(1, 'Descrição é obrigatória'),
   amountCents: z.number().int().positive('Valor deve ser maior que zero'),
   purchasedAt: z.date().optional(),

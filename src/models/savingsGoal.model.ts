@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { baseEntitySchema } from './common.model'
 
 export const savingsGoalSchema = baseEntitySchema.extend({
+  profileId: z.uuid(),
   name: z.string().min(1, 'Nome é obrigatório'),
   targetCents: z.number().int().positive(),
   currentCents: z.number().int().min(0),
@@ -10,6 +11,7 @@ export const savingsGoalSchema = baseEntitySchema.extend({
 export type SavingsGoal = z.infer<typeof savingsGoalSchema>
 
 export const createSavingsGoalInputSchema = z.object({
+  profileId: z.uuid(),
   name: z.string().min(1, 'Nome é obrigatório'),
   targetCents: z.number().int().positive('Meta deve ser maior que zero'),
   deadline: z.coerce.date().optional(),

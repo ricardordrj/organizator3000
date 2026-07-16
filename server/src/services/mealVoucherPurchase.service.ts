@@ -10,6 +10,7 @@ type MealVoucherPurchaseRow = typeof mealVoucherPurchases.$inferSelect
 function rowToPurchase(row: MealVoucherPurchaseRow) {
   return {
     id: row.id,
+    profileId: row.profileId,
     description: row.description,
     amountCents: row.amountCents,
     purchasedAt: row.purchasedAt,
@@ -28,6 +29,7 @@ export const mealVoucherPurchaseService = {
     const id = randomUUID()
     await db.insert(mealVoucherPurchases).values({
       id,
+      profileId: input.profileId,
       description: input.description,
       amountCents: input.amountCents,
       purchasedAt: input.purchasedAt ?? now,

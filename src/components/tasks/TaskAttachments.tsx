@@ -4,6 +4,7 @@ import { DownloadIcon, FileCodeIcon, ImageIcon, XIcon } from 'lucide-react'
 import type { TaskAttachment } from '@/models'
 import { attachmentService } from '@/services'
 import { Button } from '@/components/ui/button'
+import { CodeBlock } from '@/components/common/CodeBlock'
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes}B`
@@ -114,9 +115,9 @@ export function TaskAttachments({ attachments, onUpload, onRemove }: TaskAttachm
                     <p className="text-xs text-muted-foreground">Carregando...</p>
                   ) : (
                     <>
-                      <pre className="max-h-64 overflow-auto rounded-md bg-muted p-2 text-xs">
-                        {previewContent?.content}
-                      </pre>
+                      {previewContent && (
+                        <CodeBlock code={previewContent.content} fileName={attachment.fileName} />
+                      )}
                       {previewContent?.truncated && (
                         <p className="mt-1 text-xs text-muted-foreground">
                           Conteúdo truncado (arquivo muito grande para exibir por completo).

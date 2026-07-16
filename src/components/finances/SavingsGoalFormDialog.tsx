@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
 import type { SavingsGoal } from '@/models'
-import { useSavingsGoals } from '@/hooks'
+import { useSavingsGoals, useFinanceProfiles } from '@/hooks'
 import { ApiError } from '@/services/apiClient'
 import { parseCurrencyInputToCents } from '@/utils/currency.utils'
 import { Button } from '@/components/ui/button'
@@ -37,6 +37,7 @@ interface SavingsGoalFormDialogProps {
 
 export function SavingsGoalFormDialog({ goal, open, onOpenChange }: SavingsGoalFormDialogProps) {
   const { addSavingsGoal, editSavingsGoal } = useSavingsGoals()
+  const { activeFinanceProfileId } = useFinanceProfiles()
   const [submitting, setSubmitting] = useState(false)
 
   const form = useForm<SavingsGoalFormValues>({
@@ -57,13 +58,23 @@ export function SavingsGoalFormDialog({ goal, open, onOpenChange }: SavingsGoalF
       return
     }
 
+    if (!goal && !activeFinanceProfileId) {
+      toast.error('Selecione um perfil antes de criar a meta')
+      return
+    }
+
     setSubmitting(true)
     try {
       if (goal) {
         await editSavingsGoal(goal.id, { name: values.name, targetCents, deadline: values.deadline })
         toast.success('Meta atualizada com sucesso')
       } else {
-        await addSavingsGoal({ name: values.name, targetCents, deadline: values.deadline })
+        await addSavingsGoal({
+          name: values.name,
+          targetCents,
+          deadline: values.deadline,
+          profileId: activeFinanceProfileId!,
+        })
         toast.success('Meta criada com sucesso')
       }
       onOpenChange(false)

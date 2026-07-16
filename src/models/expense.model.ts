@@ -16,6 +16,7 @@ export const expenseKindSchema = z.enum(['bill', 'subscription'])
 export type ExpenseKind = z.infer<typeof expenseKindSchema>
 
 export const expenseSchema = baseEntitySchema.extend({
+  profileId: z.uuid(),
   description: z.string().min(1, 'Descrição é obrigatória'),
   amountCents: z.number().int().positive(),
   category: expenseCategorySchema,
@@ -27,6 +28,7 @@ export const expenseSchema = baseEntitySchema.extend({
 export type Expense = z.infer<typeof expenseSchema>
 
 export const createExpenseInputSchema = z.object({
+  profileId: z.uuid(),
   description: z.string().min(1, 'Descrição é obrigatória'),
   amountCents: z.number().int().positive('Valor deve ser maior que zero'),
   category: expenseCategorySchema,

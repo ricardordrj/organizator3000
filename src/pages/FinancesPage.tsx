@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { isSameMonth } from 'date-fns'
 import { PlusIcon, XIcon } from 'lucide-react'
 import { toast } from 'sonner'
-import { useExpenses, useSavingsGoals, useIncomes, useMealVoucherPurchases } from '@/hooks'
+import { useExpenses, useSavingsGoals, useIncomes, useMealVoucherPurchases, useFinanceProfiles } from '@/hooks'
 import type { Expense, SavingsGoal, Income } from '@/models'
 import { ApiError } from '@/services/apiClient'
 import { formatCentsBRL } from '@/utils/currency.utils'
@@ -16,13 +16,32 @@ import { SavingsGoalFormDialog } from '@/components/finances/SavingsGoalFormDial
 import { ContributeGoalDialog } from '@/components/finances/ContributeGoalDialog'
 import { IncomeFormDialog } from '@/components/finances/IncomeFormDialog'
 import { MealVoucherQuickAddForm } from '@/components/finances/MealVoucherQuickAddForm'
+import { FinanceProfileSelector } from '@/components/finances/FinanceProfileSelector'
 import { categoryLabels, kindLabels, incomeKindLabels } from '@/components/finances/financeLabels'
 
 export function FinancesPage() {
-  const { expenses, markExpensePaid, removeExpense } = useExpenses()
-  const { savingsGoals, removeSavingsGoal } = useSavingsGoals()
-  const { incomes, removeIncome } = useIncomes()
-  const { mealVoucherPurchases, removeMealVoucherPurchase } = useMealVoucherPurchases()
+  const { activeFinanceProfileId } = useFinanceProfiles()
+  const { expenses: allExpenses, markExpensePaid, removeExpense } = useExpenses()
+  const { savingsGoals: allSavingsGoals, removeSavingsGoal } = useSavingsGoals()
+  const { incomes: allIncomes, removeIncome } = useIncomes()
+  const { mealVoucherPurchases: allMealVoucherPurchases, removeMealVoucherPurchase } = useMealVoucherPurchases()
+
+  const expenses = useMemo(
+    () => allExpenses.filter((e) => e.profileId === activeFinanceProfileId),
+    [allExpenses, activeFinanceProfileId],
+  )
+  const savingsGoals = useMemo(
+    () => allSavingsGoals.filter((g) => g.profileId === activeFinanceProfileId),
+    [allSavingsGoals, activeFinanceProfileId],
+  )
+  const incomes = useMemo(
+    () => allIncomes.filter((i) => i.profileId === activeFinanceProfileId),
+    [allIncomes, activeFinanceProfileId],
+  )
+  const mealVoucherPurchases = useMemo(
+    () => allMealVoucherPurchases.filter((p) => p.profileId === activeFinanceProfileId),
+    [allMealVoucherPurchases, activeFinanceProfileId],
+  )
 
   const [expenseFormOpen, setExpenseFormOpen] = useState(false)
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null)
@@ -137,10 +156,13 @@ export function FinancesPage() {
     <section className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-xl font-semibold">Finanças</h2>
-        <Button onClick={openCreateExpense}>
-          <PlusIcon className="size-4" />
-          Nova despesa
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <FinanceProfileSelector />
+          <Button onClick={openCreateExpense}>
+            <PlusIcon className="size-4" />
+            Nova despesa
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">

@@ -16,6 +16,7 @@ function isPaidThisCycle(lastPaidAt: Date | null): boolean {
 function rowToExpense(row: ExpenseRow) {
   return {
     id: row.id,
+    profileId: row.profileId,
     description: row.description,
     amountCents: row.amountCents,
     category: row.category,
@@ -48,6 +49,7 @@ export const expenseService = {
     const id = randomUUID()
     await db.insert(expenses).values({
       id,
+      profileId: input.profileId,
       description: input.description,
       amountCents: input.amountCents,
       category: input.category,

@@ -50,6 +50,13 @@
       "when": 1784171455654,
       "tag": "0006_nasty_unus",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1784217792827,
+      "tag": "0007_add_finance_profiles",
+      "breakpoints": true
     }
   ]
 }

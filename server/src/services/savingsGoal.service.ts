@@ -10,6 +10,7 @@ type SavingsGoalRow = typeof savingsGoals.$inferSelect
 function rowToSavingsGoal(row: SavingsGoalRow) {
   return {
     id: row.id,
+    profileId: row.profileId,
     name: row.name,
     targetCents: row.targetCents,
     currentCents: row.currentCents,
@@ -39,6 +40,7 @@ export const savingsGoalService = {
     const id = randomUUID()
     await db.insert(savingsGoals).values({
       id,
+      profileId: input.profileId,
       name: input.name,
       targetCents: input.targetCents,
       currentCents: 0,

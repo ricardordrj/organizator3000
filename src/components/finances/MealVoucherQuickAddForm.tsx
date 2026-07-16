@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { toast } from 'sonner'
-import { useMealVoucherPurchases } from '@/hooks'
+import { useMealVoucherPurchases, useFinanceProfiles } from '@/hooks'
 import { ApiError } from '@/services/apiClient'
 import { parseCurrencyInputToCents } from '@/utils/currency.utils'
 import { Button } from '@/components/ui/button'
@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 
 export function MealVoucherQuickAddForm() {
   const { addMealVoucherPurchase } = useMealVoucherPurchases()
+  const { activeFinanceProfileId } = useFinanceProfiles()
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -24,10 +25,18 @@ export function MealVoucherQuickAddForm() {
       toast.error('Valor inválido')
       return
     }
+    if (!activeFinanceProfileId) {
+      toast.error('Selecione um perfil antes de registrar a compra')
+      return
+    }
 
     setSubmitting(true)
     try {
-      await addMealVoucherPurchase({ description: description.trim(), amountCents })
+      await addMealVoucherPurchase({
+        description: description.trim(),
+        amountCents,
+        profileId: activeFinanceProfileId,
+      })
       toast.success('Compra registrada')
       setDescription('')
       setAmount('')

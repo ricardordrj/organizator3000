@@ -10,6 +10,7 @@ type IncomeRow = typeof incomes.$inferSelect
 function rowToIncome(row: IncomeRow) {
   return {
     id: row.id,
+    profileId: row.profileId,
     description: row.description,
     amountCents: row.amountCents,
     kind: row.kind,
@@ -34,6 +35,7 @@ export const incomeService = {
     const id = randomUUID()
     await db.insert(incomes).values({
       id,
+      profileId: input.profileId,
       description: input.description,
       amountCents: input.amountCents,
       kind: input.kind,
