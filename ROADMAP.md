@@ -38,6 +38,8 @@ Lista de melhorias planejadas para o organizador pessoal. Conforme forem sendo u
 
 ## Feito
 
+- **Redesign visual cyberpunk x Dark Souls** — paleta ciano/magenta/dourado ("ember"), fonte Orbitron nos títulos, glow em cards e botões, scanlines sutis, nav mobile com menu hambúrguer. Testado em 375px sem overflow horizontal.
+- **Renda e vale alimentação** — cadastro de salário e outras rendas mensais; vale alimentação funciona como saldo (renda cadastrada menos compras do mês). Despesa rápida de supermercado com descrição obrigatória (o que foi comprado), descontada automaticamente do saldo do vale. Resumo mensal expandido: renda total, gasto total, saldo do mês e saldo do vale, tudo em `/financas`.
 - **Finanças pessoais** — tela `/financas` nova, fora do domínio de tarefas: contas a pagar e assinaturas recorrentes (com "marcar como pago" por ciclo mensal), total gasto por mês, gasto por categoria, e metas de economia com barra de progresso e contribuições. Testado localmente e já em produção (`ricardordrj.com`).
 - Anexos (imagens e código) em tarefas e respostas
 - Thread de respostas por tarefa

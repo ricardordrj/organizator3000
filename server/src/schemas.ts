@@ -119,6 +119,29 @@ export const updateExpenseInputSchema = z.object({
 })
 export type UpdateExpenseInput = z.infer<typeof updateExpenseInputSchema>
 
+export const incomeKindSchema = z.enum(['salary', 'meal_voucher', 'other'])
+
+export const createIncomeInputSchema = z.object({
+  description: z.string().min(1, 'Descrição é obrigatória'),
+  amountCents: z.coerce.number().int().positive('Valor deve ser maior que zero'),
+  kind: incomeKindSchema,
+})
+export type CreateIncomeInput = z.infer<typeof createIncomeInputSchema>
+
+export const updateIncomeInputSchema = z.object({
+  description: z.string().min(1).optional(),
+  amountCents: z.coerce.number().int().positive().optional(),
+  kind: incomeKindSchema.optional(),
+})
+export type UpdateIncomeInput = z.infer<typeof updateIncomeInputSchema>
+
+export const createMealVoucherPurchaseInputSchema = z.object({
+  description: z.string().min(1, 'Descrição é obrigatória'),
+  amountCents: z.coerce.number().int().positive('Valor deve ser maior que zero'),
+  purchasedAt: z.coerce.date().optional(),
+})
+export type CreateMealVoucherPurchaseInput = z.infer<typeof createMealVoucherPurchaseInputSchema>
+
 export const createSavingsGoalInputSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
   targetCents: z.coerce.number().int().positive('Meta deve ser maior que zero'),

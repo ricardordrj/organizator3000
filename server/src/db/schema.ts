@@ -194,6 +194,31 @@ export const expenses = sqliteTable(
   }),
 )
 
+// ---------- incomes (salário, vale alimentação etc. — Fase Finanças) ----------
+export const incomes = sqliteTable('incomes', {
+  id: text('id').primaryKey(),
+  description: text('description').notNull(),
+  amountCents: integer('amount_cents').notNull(),
+  kind: text('kind', { enum: ['salary', 'meal_voucher', 'other'] }).notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
+})
+
+// ---------- meal_voucher_purchases (gasto rápido de supermercado, descontado do vale — Fase Finanças) ----------
+export const mealVoucherPurchases = sqliteTable(
+  'meal_voucher_purchases',
+  {
+    id: text('id').primaryKey(),
+    description: text('description').notNull(),
+    amountCents: integer('amount_cents').notNull(),
+    purchasedAt: integer('purchased_at', { mode: 'timestamp_ms' }).notNull(),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+  },
+  (t) => ({
+    purchasedAtIdx: index('meal_voucher_purchases_purchased_at_idx').on(t.purchasedAt),
+  }),
+)
+
 // ---------- savings_goals (metas de economia — Fase Finanças) ----------
 export const savingsGoals = sqliteTable('savings_goals', {
   id: text('id').primaryKey(),

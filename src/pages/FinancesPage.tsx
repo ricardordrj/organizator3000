@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react'
-import { PlusIcon } from 'lucide-react'
+import { isSameMonth } from 'date-fns'
+import { PlusIcon, XIcon } from 'lucide-react'
 import { toast } from 'sonner'
-import { useExpenses, useSavingsGoals } from '@/hooks'
-import type { Expense, SavingsGoal } from '@/models'
+import { useExpenses, useSavingsGoals, useIncomes, useMealVoucherPurchases } from '@/hooks'
+import type { Expense, SavingsGoal, Income } from '@/models'
 import { ApiError } from '@/services/apiClient'
 import { formatCentsBRL } from '@/utils/currency.utils'
-import { formatDate } from '@/utils/date.utils'
+import { formatDate, formatDateTime } from '@/utils/date.utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
@@ -13,11 +14,15 @@ import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 import { ExpenseFormDialog } from '@/components/finances/ExpenseFormDialog'
 import { SavingsGoalFormDialog } from '@/components/finances/SavingsGoalFormDialog'
 import { ContributeGoalDialog } from '@/components/finances/ContributeGoalDialog'
-import { categoryLabels, kindLabels } from '@/components/finances/financeLabels'
+import { IncomeFormDialog } from '@/components/finances/IncomeFormDialog'
+import { MealVoucherQuickAddForm } from '@/components/finances/MealVoucherQuickAddForm'
+import { categoryLabels, kindLabels, incomeKindLabels } from '@/components/finances/financeLabels'
 
 export function FinancesPage() {
   const { expenses, markExpensePaid, removeExpense } = useExpenses()
   const { savingsGoals, removeSavingsGoal } = useSavingsGoals()
+  const { incomes, removeIncome } = useIncomes()
+  const { mealVoucherPurchases, removeMealVoucherPurchase } = useMealVoucherPurchases()
 
   const [expenseFormOpen, setExpenseFormOpen] = useState(false)
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null)
@@ -28,14 +33,14 @@ export function FinancesPage() {
   const [contributeTarget, setContributeTarget] = useState<SavingsGoal | null>(null)
   const [removeGoalTarget, setRemoveGoalTarget] = useState<SavingsGoal | null>(null)
 
+  const [incomeFormOpen, setIncomeFormOpen] = useState(false)
+  const [editingIncome, setEditingIncome] = useState<Income | null>(null)
+  const [removeIncomeTarget, setRemoveIncomeTarget] = useState<Income | null>(null)
+
   const sortedExpenses = useMemo(() => [...expenses].sort((a, b) => a.dueDay - b.dueDay), [expenses])
 
-  const monthlyTotalCents = useMemo(
+  const expensesTotalCents = useMemo(
     () => expenses.reduce((sum, expense) => sum + expense.amountCents, 0),
-    [expenses],
-  )
-  const subscriptionsTotalCents = useMemo(
-    () => expenses.filter((e) => e.kind === 'subscription').reduce((sum, e) => sum + e.amountCents, 0),
     [expenses],
   )
   const byCategory = useMemo(() => {
@@ -45,6 +50,29 @@ export function FinancesPage() {
     }
     return [...map.entries()].sort((a, b) => b[1] - a[1])
   }, [expenses])
+
+  const incomeTotalCents = useMemo(() => incomes.reduce((sum, income) => sum + income.amountCents, 0), [incomes])
+  const mealVoucherIncomeCents = useMemo(
+    () => incomes.filter((i) => i.kind === 'meal_voucher').reduce((sum, i) => sum + i.amountCents, 0),
+    [incomes],
+  )
+
+  const now = useMemo(() => new Date(), [])
+  const purchasesThisMonth = useMemo(
+    () =>
+      [...mealVoucherPurchases]
+        .filter((p) => isSameMonth(p.purchasedAt, now))
+        .sort((a, b) => b.purchasedAt.getTime() - a.purchasedAt.getTime()),
+    [mealVoucherPurchases, now],
+  )
+  const voucherSpentCents = useMemo(
+    () => purchasesThisMonth.reduce((sum, p) => sum + p.amountCents, 0),
+    [purchasesThisMonth],
+  )
+  const voucherBalanceCents = mealVoucherIncomeCents - voucherSpentCents
+
+  const totalExpensesCents = expensesTotalCents + voucherSpentCents
+  const netCents = incomeTotalCents - totalExpensesCents
 
   function openCreateExpense() {
     setEditingExpense(null)
@@ -86,6 +114,25 @@ export function FinancesPage() {
     }
   }
 
+  async function handleRemoveIncome() {
+    if (!removeIncomeTarget) return
+    try {
+      await removeIncome(removeIncomeTarget.id)
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Erro ao remover a renda')
+    } finally {
+      setRemoveIncomeTarget(null)
+    }
+  }
+
+  async function handleRemovePurchase(id: string) {
+    try {
+      await removeMealVoucherPurchase(id)
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Erro ao remover a compra')
+    }
+  }
+
   return (
     <section className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -96,24 +143,32 @@ export function FinancesPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">{formatCentsBRL(monthlyTotalCents)}</CardTitle>
+            <CardTitle className="text-2xl text-emerald-500">{formatCentsBRL(incomeTotalCents)}</CardTitle>
           </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">Total mensal (contas + assinaturas)</CardContent>
+          <CardContent className="text-sm text-muted-foreground">Renda mensal</CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">{formatCentsBRL(subscriptionsTotalCents)}</CardTitle>
+            <CardTitle className="text-2xl text-destructive">{formatCentsBRL(totalExpensesCents)}</CardTitle>
           </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">Só assinaturas</CardContent>
+          <CardContent className="text-sm text-muted-foreground">Total de gastos (mês)</CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">{expenses.length}</CardTitle>
+            <CardTitle className={netCents >= 0 ? 'text-2xl text-emerald-500' : 'text-2xl text-destructive'}>
+              {formatCentsBRL(netCents)}
+            </CardTitle>
           </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">Despesas cadastradas</CardContent>
+          <CardContent className="text-sm text-muted-foreground">Saldo do mês</CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl text-ember">{formatCentsBRL(voucherBalanceCents)}</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm text-muted-foreground">Saldo vale alimentação</CardContent>
         </Card>
       </div>
 
@@ -128,10 +183,93 @@ export function FinancesPage() {
                   <span className="text-muted-foreground">{formatCentsBRL(cents)}</span>
                 </Badge>
               ))}
+              {voucherSpentCents > 0 && (
+                <Badge variant="outline" className="gap-1.5">
+                  Vale alimentação
+                  <span className="text-muted-foreground">{formatCentsBRL(voucherSpentCents)}</span>
+                </Badge>
+              )}
             </div>
           </CardContent>
         </Card>
       )}
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-medium">Renda</h3>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setEditingIncome(null)
+              setIncomeFormOpen(true)
+            }}
+          >
+            <PlusIcon className="size-4" />
+            Nova renda
+          </Button>
+        </div>
+        {incomes.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nenhuma renda cadastrada ainda.</p>
+        ) : (
+          <ul className="space-y-2">
+            {incomes.map((income) => (
+              <Card key={income.id} className="gap-0 py-0">
+                <div className="flex flex-wrap items-center gap-2 p-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium">{income.description}</p>
+                  </div>
+                  <Badge variant="outline">{incomeKindLabels[income.kind]}</Badge>
+                  <span className="font-medium text-emerald-500">{formatCentsBRL(income.amountCents)}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setEditingIncome(income)
+                      setIncomeFormOpen(true)
+                    }}
+                  >
+                    Editar
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => setRemoveIncomeTarget(income)}>
+                    Remover
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <h3 className="text-sm font-medium">Vale alimentação — supermercado</h3>
+        <Card>
+          <CardContent className="space-y-3">
+            <MealVoucherQuickAddForm />
+            {purchasesThisMonth.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhuma compra registrada este mês.</p>
+            ) : (
+              <ul className="space-y-1.5 border-t pt-3">
+                {purchasesThisMonth.map((purchase) => (
+                  <li key={purchase.id} className="flex flex-wrap items-center gap-2 text-sm">
+                    <span className="min-w-0 flex-1 truncate">{purchase.description}</span>
+                    <span className="text-xs text-muted-foreground">{formatDateTime(purchase.purchasedAt)}</span>
+                    <span className="font-medium">{formatCentsBRL(purchase.amountCents)}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemovePurchase(purchase.id)}
+                      className="text-muted-foreground hover:text-destructive"
+                      title="Remover"
+                    >
+                      <XIcon className="size-3.5" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       <div className="space-y-2">
         <h3 className="text-sm font-medium">Contas e assinaturas</h3>
@@ -244,6 +382,7 @@ export function FinancesPage() {
 
       <ExpenseFormDialog expense={editingExpense} open={expenseFormOpen} onOpenChange={setExpenseFormOpen} />
       <SavingsGoalFormDialog goal={editingGoal} open={goalFormOpen} onOpenChange={setGoalFormOpen} />
+      <IncomeFormDialog income={editingIncome} open={incomeFormOpen} onOpenChange={setIncomeFormOpen} />
       <ContributeGoalDialog
         goal={contributeTarget}
         onOpenChange={(open) => {
@@ -270,6 +409,16 @@ export function FinancesPage() {
         description={`Tem certeza que deseja remover "${removeGoalTarget?.name}"?`}
         confirmLabel="Remover"
         onConfirm={handleRemoveGoal}
+      />
+      <ConfirmDialog
+        open={removeIncomeTarget != null}
+        onOpenChange={(open) => {
+          if (!open) setRemoveIncomeTarget(null)
+        }}
+        title="Remover renda"
+        description={`Tem certeza que deseja remover "${removeIncomeTarget?.description}"?`}
+        confirmLabel="Remover"
+        onConfirm={handleRemoveIncome}
       />
     </section>
   )

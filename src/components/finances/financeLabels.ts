@@ -1,4 +1,4 @@
-import type { ExpenseCategory, ExpenseKind } from '@/models'
+import type { ExpenseCategory, ExpenseKind, IncomeKind } from '@/models'
 
 export const categoryLabels: Record<ExpenseCategory, string> = {
   moradia: 'Moradia',
@@ -13,4 +13,10 @@ export const categoryLabels: Record<ExpenseCategory, string> = {
 export const kindLabels: Record<ExpenseKind, string> = {
   bill: 'Conta',
   subscription: 'Assinatura',
+}
+
+export const incomeKindLabels: Record<IncomeKind, string> = {
+  salary: 'Salário',
+  meal_voucher: 'Vale Alimentação',
+  other: 'Outra renda',
 }

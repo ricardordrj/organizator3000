@@ -17,6 +17,11 @@ import type {
   SavingsGoal,
   CreateSavingsGoalInput,
   UpdateSavingsGoalInput,
+  Income,
+  CreateIncomeInput,
+  UpdateIncomeInput,
+  MealVoucherPurchase,
+  CreateMealVoucherPurchaseInput,
 } from '@/models'
 
 export interface UiSlice {
@@ -69,12 +74,27 @@ export interface SavingsGoalSlice {
   removeSavingsGoal: (id: string) => Promise<void>
 }
 
+export interface IncomeSlice {
+  incomes: Income[]
+  addIncome: (input: CreateIncomeInput) => Promise<Income>
+  editIncome: (id: string, patch: UpdateIncomeInput) => Promise<void>
+  removeIncome: (id: string) => Promise<void>
+}
+
+export interface MealVoucherPurchaseSlice {
+  mealVoucherPurchases: MealVoucherPurchase[]
+  addMealVoucherPurchase: (input: CreateMealVoucherPurchaseInput) => Promise<MealVoucherPurchase>
+  removeMealVoucherPurchase: (id: string) => Promise<void>
+}
+
 export interface AppState
   extends UiSlice,
     TaskSlice,
     PersonSlice,
     TagSlice,
     ExpenseSlice,
-    SavingsGoalSlice {
+    SavingsGoalSlice,
+    IncomeSlice,
+    MealVoucherPurchaseSlice {
   hydrate: () => Promise<void>
 }
