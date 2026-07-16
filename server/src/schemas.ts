@@ -90,6 +90,54 @@ export const createResponseInputSchema = z.object({
 })
 export type CreateResponseInput = z.infer<typeof createResponseInputSchema>
 
+export const expenseCategorySchema = z.enum([
+  'moradia',
+  'mercado',
+  'transporte',
+  'lazer',
+  'saude',
+  'assinatura',
+  'outros',
+])
+export const expenseKindSchema = z.enum(['bill', 'subscription'])
+
+export const createExpenseInputSchema = z.object({
+  description: z.string().min(1, 'Descrição é obrigatória'),
+  amountCents: z.coerce.number().int().positive('Valor deve ser maior que zero'),
+  category: expenseCategorySchema,
+  kind: expenseKindSchema,
+  dueDay: z.coerce.number().int().min(1).max(31),
+})
+export type CreateExpenseInput = z.infer<typeof createExpenseInputSchema>
+
+export const updateExpenseInputSchema = z.object({
+  description: z.string().min(1).optional(),
+  amountCents: z.coerce.number().int().positive().optional(),
+  category: expenseCategorySchema.optional(),
+  kind: expenseKindSchema.optional(),
+  dueDay: z.coerce.number().int().min(1).max(31).optional(),
+})
+export type UpdateExpenseInput = z.infer<typeof updateExpenseInputSchema>
+
+export const createSavingsGoalInputSchema = z.object({
+  name: z.string().min(1, 'Nome é obrigatório'),
+  targetCents: z.coerce.number().int().positive('Meta deve ser maior que zero'),
+  deadline: z.coerce.date().optional(),
+})
+export type CreateSavingsGoalInput = z.infer<typeof createSavingsGoalInputSchema>
+
+export const updateSavingsGoalInputSchema = z.object({
+  name: z.string().min(1).optional(),
+  targetCents: z.coerce.number().int().positive().optional(),
+  deadline: z.coerce.date().optional(),
+})
+export type UpdateSavingsGoalInput = z.infer<typeof updateSavingsGoalInputSchema>
+
+export const contributeSavingsGoalInputSchema = z.object({
+  amountCents: z.coerce.number().int().positive('Valor deve ser maior que zero'),
+})
+export type ContributeSavingsGoalInput = z.infer<typeof contributeSavingsGoalInputSchema>
+
 export const settingsInputSchema = z.object({
   theme: z.enum(['light', 'dark', 'system']),
   language: z.enum(['pt-BR', 'en-US']),

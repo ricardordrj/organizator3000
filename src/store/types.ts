@@ -11,6 +11,12 @@ import type {
   CreateTagInput,
   UpdateTagInput,
   TaskResponse,
+  Expense,
+  CreateExpenseInput,
+  UpdateExpenseInput,
+  SavingsGoal,
+  CreateSavingsGoalInput,
+  UpdateSavingsGoalInput,
 } from '@/models'
 
 export interface UiSlice {
@@ -47,6 +53,28 @@ export interface TagSlice {
   removeTag: (id: string) => Promise<void>
 }
 
-export interface AppState extends UiSlice, TaskSlice, PersonSlice, TagSlice {
+export interface ExpenseSlice {
+  expenses: Expense[]
+  addExpense: (input: CreateExpenseInput) => Promise<Expense>
+  editExpense: (id: string, patch: UpdateExpenseInput) => Promise<void>
+  markExpensePaid: (id: string) => Promise<void>
+  removeExpense: (id: string) => Promise<void>
+}
+
+export interface SavingsGoalSlice {
+  savingsGoals: SavingsGoal[]
+  addSavingsGoal: (input: CreateSavingsGoalInput) => Promise<SavingsGoal>
+  editSavingsGoal: (id: string, patch: UpdateSavingsGoalInput) => Promise<void>
+  contributeSavingsGoal: (id: string, amountCents: number) => Promise<void>
+  removeSavingsGoal: (id: string) => Promise<void>
+}
+
+export interface AppState
+  extends UiSlice,
+    TaskSlice,
+    PersonSlice,
+    TagSlice,
+    ExpenseSlice,
+    SavingsGoalSlice {
   hydrate: () => Promise<void>
 }

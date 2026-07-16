@@ -7,6 +7,7 @@ import { TasksPage } from '@/pages/TasksPage'
 import { TaskDetailPage } from '@/pages/TaskDetailPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { CadastrosPage } from '@/pages/CadastrosPage'
+import { FinancesPage } from '@/pages/FinancesPage'
 import { RoadmapPage } from '@/pages/RoadmapPage'
 import { useTheme } from '@/hooks'
 
@@ -25,6 +26,7 @@ function App() {
             <Route path="tasks" element={<TasksPage />} />
             <Route path="tasks/:id" element={<TaskDetailPage />} />
             <Route path="cadastros" element={<CadastrosPage />} />
+            <Route path="financas" element={<FinancesPage />} />
             <Route path="roadmap" element={<RoadmapPage />} />
             <Route path="settings" element={<SettingsPage />} />
           </Route>

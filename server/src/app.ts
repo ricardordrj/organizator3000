@@ -11,6 +11,8 @@ import { attachmentRoutes } from './routes/attachments.routes.js'
 import { peopleRoutes } from './routes/people.routes.js'
 import { tagRoutes } from './routes/tags.routes.js'
 import { responseRoutes } from './routes/responses.routes.js'
+import { expenseRoutes } from './routes/expenses.routes.js'
+import { savingsGoalRoutes } from './routes/savingsGoals.routes.js'
 import { registerStatic } from './plugins/static.js'
 
 export function buildApp() {
@@ -40,6 +42,8 @@ export function buildApp() {
   app.register(peopleRoutes, { prefix: '/api' })
   app.register(tagRoutes, { prefix: '/api' })
   app.register(responseRoutes, { prefix: '/api' })
+  app.register(expenseRoutes, { prefix: '/api' })
+  app.register(savingsGoalRoutes, { prefix: '/api' })
 
   if (env.NODE_ENV === 'production') {
     app.register(registerStatic)

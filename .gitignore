@@ -35,3 +35,7 @@ server/.env
 
 # Claude Code local settings (per-machine permission overrides)
 .claude/settings.local.json
+
+# SSH keys generated for deploy — never commit private keys
+deploy_key
+deploy_key.pub

@@ -5,6 +5,7 @@ Lista de melhorias planejadas para o organizador pessoal. Conforme forem sendo u
 ## Bugs conhecidos
 
 - [ ] **Prazo no mesmo dia usa o horário atual** — em `DeadlineField.tsx`, ao escolher uma data no calendário o horário aplicado é sempre o horário atual (`now.getHours()/getMinutes()`). Ao definir o prazo pra hoje, o horário fica igual (ou passa a ser passado poucos segundos depois), fazendo a tarefa parecer atrasada assim que é criada. Esperado: quando a data escolhida for hoje, aplicar o último horário do dia (23:59) em vez do horário atual.
+- [ ] **Diálogos podem ficar presos na animação de fechar** — todo `Dialog` do app (`components/ui/dialog.tsx`, base-ui) espera a animação CSS de saída terminar antes de desmontar. Em teste automatizado (navegador headless, `prefers-reduced-motion: reduce` forçado) essa animação ficou congelada em `currentTime: 0` e o diálogo nunca fechou sozinho após salvar — reproduzido tanto no `TaskFormDialog` (já existente) quanto nos novos diálogos de finanças, então não é regressão do módulo novo. Provavelmente é artefato do ambiente de teste (aba em segundo plano/throttling), não reproduzido no uso normal até agora — mas vale prestar atenção caso algum dia um diálogo "não feche" de verdade pra você, principalmente se usar "reduzir movimento" nas configurações do sistema/navegador.
 
 ## Infraestrutura
 
@@ -18,11 +19,6 @@ Lista de melhorias planejadas para o organizador pessoal. Conforme forem sendo u
 - [ ] **Utilitários de dev**
   - [ ] Templates de tarefa para tipos recorrentes (bug, feature, etc.)
   - [ ] Atalho de teclado (Cmd/Ctrl+K) para criar tarefa rápida ou buscar
-- [ ] **Finanças pessoais** — módulo novo, fora do domínio de tarefas
-  - [ ] Contas a pagar (boletos, assinaturas) com lembrete antes do vencimento
-  - [ ] Assinaturas recorrentes (Netflix, Spotify, academia...) com total gasto por mês
-  - [ ] Controle de gastos por categoria (mercado, lazer, transporte)
-  - [ ] Metas de economia / reserva de emergência
 
 ## Em avaliação
 
@@ -42,6 +38,7 @@ Lista de melhorias planejadas para o organizador pessoal. Conforme forem sendo u
 
 ## Feito
 
+- **Finanças pessoais** — tela `/financas` nova, fora do domínio de tarefas: contas a pagar e assinaturas recorrentes (com "marcar como pago" por ciclo mensal), total gasto por mês, gasto por categoria, e metas de economia com barra de progresso e contribuições. Testado localmente (criar, editar, pagar, contribuir, remover) — falta rodar em produção depois do próximo deploy.
 - Anexos (imagens e código) em tarefas e respostas
 - Thread de respostas por tarefa
 - Cadastro de tags e pessoas (devs/POs)

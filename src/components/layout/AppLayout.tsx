@@ -5,6 +5,7 @@ const navItems = [
   { to: '/', label: 'Dashboard', end: true },
   { to: '/tasks', label: 'Tarefas', end: false },
   { to: '/cadastros', label: 'Cadastros', end: false },
+  { to: '/financas', label: 'Finanças', end: false },
   { to: '/roadmap', label: 'Roadmap', end: false },
   { to: '/settings', label: 'Configurações', end: false },
 ]

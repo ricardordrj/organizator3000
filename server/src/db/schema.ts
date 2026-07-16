@@ -172,6 +172,39 @@ export const taskTags = sqliteTable(
   }),
 )
 
+// ---------- expenses (contas a pagar + assinaturas — Fase Finanças) ----------
+export const expenses = sqliteTable(
+  'expenses',
+  {
+    id: text('id').primaryKey(),
+    description: text('description').notNull(),
+    amountCents: integer('amount_cents').notNull(),
+    category: text('category', {
+      enum: ['moradia', 'mercado', 'transporte', 'lazer', 'saude', 'assinatura', 'outros'],
+    }).notNull(),
+    kind: text('kind', { enum: ['bill', 'subscription'] }).notNull(),
+    dueDay: integer('due_day').notNull(),
+    // preenchido quando marcada como paga; comparado ao mês atual pra saber se já foi paga neste ciclo
+    lastPaidAt: integer('last_paid_at', { mode: 'timestamp_ms' }),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+    updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
+  },
+  (t) => ({
+    categoryIdx: index('expenses_category_idx').on(t.category),
+  }),
+)
+
+// ---------- savings_goals (metas de economia — Fase Finanças) ----------
+export const savingsGoals = sqliteTable('savings_goals', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  targetCents: integer('target_cents').notNull(),
+  currentCents: integer('current_cents').notNull().default(0),
+  deadline: integer('deadline', { mode: 'timestamp_ms' }),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
+})
+
 // ---------- settings (linha única, id=1, sem auth) ----------
 export const settings = sqliteTable('settings', {
   id: integer('id').primaryKey(),
