@@ -9,6 +9,8 @@ import {
   incomeService,
   mealVoucherPurchaseService,
   financeProfileService,
+  upgradePhaseService,
+  upgradeItemService,
 } from '@/services'
 import { createUiSlice } from './slices/uiSlice'
 import { createTaskSlice } from './slices/taskSlice'
@@ -19,6 +21,8 @@ import { createSavingsGoalSlice } from './slices/savingsGoalSlice'
 import { createIncomeSlice } from './slices/incomeSlice'
 import { createMealVoucherPurchaseSlice } from './slices/mealVoucherPurchaseSlice'
 import { createFinanceProfileSlice } from './slices/financeProfileSlice'
+import { createUpgradePhaseSlice } from './slices/upgradePhaseSlice'
+import { createUpgradeItemSlice } from './slices/upgradeItemSlice'
 import type { AppState } from './types'
 
 export const useAppStore = create<AppState>()((set, get, api) => ({
@@ -31,19 +35,34 @@ export const useAppStore = create<AppState>()((set, get, api) => ({
   ...createIncomeSlice(set, get, api),
   ...createMealVoucherPurchaseSlice(set, get, api),
   ...createFinanceProfileSlice(set, get, api),
+  ...createUpgradePhaseSlice(set, get, api),
+  ...createUpgradeItemSlice(set, get, api),
   hydrate: async () => {
-    const [settings, tasks, people, tags, expenses, savingsGoals, incomes, mealVoucherPurchases, financeProfiles] =
-      await Promise.all([
-        settingsService.get(),
-        taskService.list(),
-        personService.list(),
-        tagService.list(),
-        expenseService.list(),
-        savingsGoalService.list(),
-        incomeService.list(),
-        mealVoucherPurchaseService.list(),
-        financeProfileService.list(),
-      ])
+    const [
+      settings,
+      tasks,
+      people,
+      tags,
+      expenses,
+      savingsGoals,
+      incomes,
+      mealVoucherPurchases,
+      financeProfiles,
+      upgradePhases,
+      upgradeItems,
+    ] = await Promise.all([
+      settingsService.get(),
+      taskService.list(),
+      personService.list(),
+      tagService.list(),
+      expenseService.list(),
+      savingsGoalService.list(),
+      incomeService.list(),
+      mealVoucherPurchaseService.list(),
+      financeProfileService.list(),
+      upgradePhaseService.list(),
+      upgradeItemService.list(),
+    ])
     set({
       settings,
       tasks,
@@ -54,6 +73,8 @@ export const useAppStore = create<AppState>()((set, get, api) => ({
       incomes,
       mealVoucherPurchases,
       financeProfiles,
+      upgradePhases,
+      upgradeItems,
       isHydrated: true,
     })
     const currentActiveId = get().activeFinanceProfileId

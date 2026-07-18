@@ -9,6 +9,7 @@ import { SettingsPage } from '@/pages/SettingsPage'
 import { CadastrosPage } from '@/pages/CadastrosPage'
 import { FinancesPage } from '@/pages/FinancesPage'
 import { RoadmapPage } from '@/pages/RoadmapPage'
+import { UpgradePlanPage } from '@/pages/UpgradePlanPage'
 import { useTheme } from '@/hooks'
 
 function AppToaster() {
@@ -28,6 +29,7 @@ function App() {
             <Route path="cadastros" element={<CadastrosPage />} />
             <Route path="financas" element={<FinancesPage />} />
             <Route path="roadmap" element={<RoadmapPage />} />
+            <Route path="upgrade-pc" element={<UpgradePlanPage />} />
             <Route path="settings" element={<SettingsPage />} />
           </Route>
         </Routes>

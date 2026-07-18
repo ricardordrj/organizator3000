@@ -25,6 +25,12 @@ import type {
   FinanceProfile,
   CreateFinanceProfileInput,
   UpdateFinanceProfileInput,
+  UpgradePhase,
+  CreateUpgradePhaseInput,
+  UpdateUpgradePhaseInput,
+  UpgradeItem,
+  CreateUpgradeItemInput,
+  UpdateUpgradeItemInput,
 } from '@/models'
 
 export interface UiSlice {
@@ -101,6 +107,21 @@ export interface FinanceProfileSlice {
   removeFinanceProfile: (id: string) => Promise<void>
 }
 
+export interface UpgradePhaseSlice {
+  upgradePhases: UpgradePhase[]
+  addUpgradePhase: (input: CreateUpgradePhaseInput) => Promise<UpgradePhase>
+  editUpgradePhase: (id: string, patch: UpdateUpgradePhaseInput) => Promise<void>
+  removeUpgradePhase: (id: string) => Promise<void>
+}
+
+export interface UpgradeItemSlice {
+  upgradeItems: UpgradeItem[]
+  addUpgradeItem: (input: CreateUpgradeItemInput) => Promise<UpgradeItem>
+  editUpgradeItem: (id: string, patch: UpdateUpgradeItemInput) => Promise<void>
+  toggleUpgradeItem: (id: string) => Promise<void>
+  removeUpgradeItem: (id: string) => Promise<void>
+}
+
 export interface AppState
   extends UiSlice,
     TaskSlice,
@@ -110,6 +131,8 @@ export interface AppState
     SavingsGoalSlice,
     IncomeSlice,
     MealVoucherPurchaseSlice,
-    FinanceProfileSlice {
+    FinanceProfileSlice,
+    UpgradePhaseSlice,
+    UpgradeItemSlice {
   hydrate: () => Promise<void>
 }

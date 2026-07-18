@@ -16,6 +16,8 @@ import { expenseRoutes } from './routes/expenses.routes.js'
 import { savingsGoalRoutes } from './routes/savingsGoals.routes.js'
 import { incomeRoutes } from './routes/incomes.routes.js'
 import { mealVoucherPurchaseRoutes } from './routes/mealVoucherPurchases.routes.js'
+import { upgradePhaseRoutes } from './routes/upgradePhases.routes.js'
+import { upgradeItemRoutes } from './routes/upgradeItems.routes.js'
 import { registerStatic } from './plugins/static.js'
 
 export function buildApp() {
@@ -50,6 +52,8 @@ export function buildApp() {
   app.register(savingsGoalRoutes, { prefix: '/api' })
   app.register(incomeRoutes, { prefix: '/api' })
   app.register(mealVoucherPurchaseRoutes, { prefix: '/api' })
+  app.register(upgradePhaseRoutes, { prefix: '/api' })
+  app.register(upgradeItemRoutes, { prefix: '/api' })
 
   if (env.NODE_ENV === 'production') {
     app.register(registerStatic)

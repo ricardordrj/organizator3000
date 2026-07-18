@@ -180,3 +180,30 @@ export const settingsInputSchema = z.object({
   language: z.enum(['pt-BR', 'en-US']),
 })
 export type SettingsInput = z.infer<typeof settingsInputSchema>
+
+export const createUpgradePhaseInputSchema = z.object({
+  title: z.string().min(1, 'Título é obrigatório'),
+})
+export type CreateUpgradePhaseInput = z.infer<typeof createUpgradePhaseInputSchema>
+
+export const updateUpgradePhaseInputSchema = z.object({
+  title: z.string().min(1).optional(),
+  orderIndex: z.coerce.number().int().optional(),
+})
+export type UpdateUpgradePhaseInput = z.infer<typeof updateUpgradePhaseInputSchema>
+
+export const createUpgradeItemInputSchema = z.object({
+  phaseId: z.string().min(1, 'Fase é obrigatória'),
+  title: z.string().min(1, 'Título é obrigatório'),
+  notes: z.string().min(1).optional(),
+  priceCents: z.coerce.number().int().positive().optional(),
+})
+export type CreateUpgradeItemInput = z.infer<typeof createUpgradeItemInputSchema>
+
+export const updateUpgradeItemInputSchema = z.object({
+  title: z.string().min(1).optional(),
+  notes: z.string().min(1).nullable().optional(),
+  priceCents: z.coerce.number().int().positive().nullable().optional(),
+  orderIndex: z.coerce.number().int().optional(),
+})
+export type UpdateUpgradeItemInput = z.infer<typeof updateUpgradeItemInputSchema>

@@ -10,6 +10,7 @@ const navItems = [
   { to: '/cadastros', label: 'Cadastros', end: false },
   { to: '/financas', label: 'Finanças', end: false },
   { to: '/roadmap', label: 'Roadmap', end: false },
+  { to: '/upgrade-pc', label: 'Upgrade PC', end: false },
   { to: '/settings', label: 'Configurações', end: false },
 ]
 

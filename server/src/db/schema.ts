@@ -264,6 +264,43 @@ export const savingsGoals = sqliteTable(
   }),
 )
 
+// ---------- upgrade_phases (fases do planejamento de upgrade do PC) ----------
+export const upgradePhases = sqliteTable(
+  'upgrade_phases',
+  {
+    id: text('id').primaryKey(),
+    title: text('title').notNull(),
+    orderIndex: integer('order_index').notNull(),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+    updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
+  },
+  (t) => ({
+    orderIdx: index('upgrade_phases_order_idx').on(t.orderIndex),
+  }),
+)
+
+// ---------- upgrade_items (itens/tarefas de cada fase) ----------
+export const upgradeItems = sqliteTable(
+  'upgrade_items',
+  {
+    id: text('id').primaryKey(),
+    phaseId: text('phase_id')
+      .notNull()
+      .references(() => upgradePhases.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    notes: text('notes'),
+    priceCents: integer('price_cents'),
+    isDone: integer('is_done', { mode: 'boolean' }).notNull().default(false),
+    orderIndex: integer('order_index').notNull(),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+    updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
+  },
+  (t) => ({
+    phaseIdx: index('upgrade_items_phase_idx').on(t.phaseId),
+    orderIdx: index('upgrade_items_order_idx').on(t.orderIndex),
+  }),
+)
+
 // ---------- settings (linha única, id=1, sem auth) ----------
 export const settings = sqliteTable('settings', {
   id: integer('id').primaryKey(),
@@ -343,4 +380,12 @@ export const mealVoucherPurchasesRelations = relations(mealVoucherPurchases, ({ 
 
 export const savingsGoalsRelations = relations(savingsGoals, ({ one }) => ({
   profile: one(financeProfiles, { fields: [savingsGoals.profileId], references: [financeProfiles.id] }),
+}))
+
+export const upgradePhasesRelations = relations(upgradePhases, ({ many }) => ({
+  items: many(upgradeItems),
+}))
+
+export const upgradeItemsRelations = relations(upgradeItems, ({ one }) => ({
+  phase: one(upgradePhases, { fields: [upgradeItems.phaseId], references: [upgradePhases.id] }),
 }))
