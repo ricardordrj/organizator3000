@@ -3,7 +3,8 @@ import { and, desc, eq, inArray } from 'drizzle-orm'
 import { db } from '../db/client.js'
 import { commanderGames, commanderGamePlayers, commanderPlayers, commanderDamageRequests } from '../db/schema.js'
 import { notFound, badRequest } from '../lib/errors.js'
-import type { CreateCommanderGameInput } from '../schemas.js'
+import { commanderSeasonService } from './commanderSeason.service.js'
+import type { CreateCommanderGameInput, EndCommanderGameInput } from '../schemas.js'
 
 type PlayerRow = typeof commanderPlayers.$inferSelect
 
@@ -24,6 +25,7 @@ async function loadGamePlayers(gameId: string) {
     colorHex: player.colorHex ?? undefined,
     avatarUrl: playerAvatarUrl(player),
     life: gamePlayer.life,
+    placement: gamePlayer.placement ?? undefined,
   }))
 }
 
@@ -116,6 +118,7 @@ async function loadDetail(gameId: string) {
 
   return {
     id: game.id,
+    seasonId: game.seasonId ?? undefined,
     status: game.status,
     startingLife: game.startingLife,
     startedAt: game.startedAt,
@@ -148,10 +151,12 @@ export const commanderGameService = {
       throw badRequest('Um ou mais jogadores selecionados não existem')
     }
 
+    const season = await commanderSeasonService.ensureActive()
     const now = new Date()
     const gameId = randomUUID()
     await db.insert(commanderGames).values({
       id: gameId,
+      seasonId: season.id,
       status: 'active',
       startingLife: input.startingLife,
       startedAt: now,
@@ -174,17 +179,39 @@ export const commanderGameService = {
     return loadDetail(gameId)
   },
 
-  async end(gameId: string) {
+  async end(gameId: string, input?: EndCommanderGameInput) {
     const [game] = await db.select().from(commanderGames).where(eq(commanderGames.id, gameId))
     if (!game) throw notFound('Mesão não encontrado')
 
+    const now = new Date()
+
+    // Colocação final (1 = venceu), na ordem em que os jogadores foram enviados.
+    // Valida que os ids batem exatamente com quem estava sentado na mesa.
+    if (input?.standings && input.standings.length > 0) {
+      const seated = await db
+        .select({ playerId: commanderGamePlayers.playerId })
+        .from(commanderGamePlayers)
+        .where(eq(commanderGamePlayers.gameId, gameId))
+      const seatedIds = new Set(seated.map((r) => r.playerId))
+      const uniqueStandings = [...new Set(input.standings)]
+      if (uniqueStandings.length !== seatedIds.size || uniqueStandings.some((id) => !seatedIds.has(id))) {
+        throw badRequest('As posições precisam listar exatamente os jogadores da mesa')
+      }
+      for (let i = 0; i < uniqueStandings.length; i++) {
+        await db
+          .update(commanderGamePlayers)
+          .set({ placement: i + 1, updatedAt: now })
+          .where(and(eq(commanderGamePlayers.gameId, gameId), eq(commanderGamePlayers.playerId, uniqueStandings[i])))
+      }
+    }
+
     await db
       .update(commanderDamageRequests)
-      .set({ status: 'dismissed', resolvedAt: new Date() })
+      .set({ status: 'dismissed', resolvedAt: now })
       .where(and(eq(commanderDamageRequests.gameId, gameId), eq(commanderDamageRequests.status, 'pending')))
     await db
       .update(commanderGames)
-      .set({ status: 'ended', endedAt: new Date() })
+      .set({ status: 'ended', endedAt: now })
       .where(eq(commanderGames.id, gameId))
 
     return loadDetail(gameId)

@@ -25,6 +25,7 @@ import { shoppingProfileRoutes } from './routes/shoppingProfiles.routes.js'
 import { shoppingItemRoutes } from './routes/shoppingItems.routes.js'
 import { commanderPlayerRoutes } from './routes/commanderPlayers.routes.js'
 import { commanderGameRoutes } from './routes/commanderGames.routes.js'
+import { commanderSeasonRoutes } from './routes/commanderSeasons.routes.js'
 import { registerStatic } from './plugins/static.js'
 
 export function buildApp() {
@@ -99,6 +100,7 @@ export function buildApp() {
   app.register(shoppingItemRoutes, { prefix: '/api' })
   app.register(commanderPlayerRoutes, { prefix: '/api' })
   app.register(commanderGameRoutes, { prefix: '/api' })
+  app.register(commanderSeasonRoutes, { prefix: '/api' })
 
   if (env.NODE_ENV === 'production') {
     app.register(registerStatic)

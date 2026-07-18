@@ -392,11 +392,29 @@ export const commanderPlayers = sqliteTable(
   }),
 )
 
+// ---------- commander_seasons (temporadas/"boards" do ranking; normalmente reiniciadas por ano) ----------
+export const commanderSeasons = sqliteTable(
+  'commander_seasons',
+  {
+    id: text('id').primaryKey(),
+    name: text('name').notNull(),
+    status: text('status', { enum: ['active', 'archived'] }).notNull().default('active'),
+    startedAt: integer('started_at', { mode: 'timestamp_ms' }).notNull(),
+    endedAt: integer('ended_at', { mode: 'timestamp_ms' }),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+  },
+  (t) => ({
+    statusIdx: index('commander_seasons_status_idx').on(t.status),
+  }),
+)
+
 // ---------- commander_games (um mesão/sessão de jogo) ----------
 export const commanderGames = sqliteTable(
   'commander_games',
   {
     id: text('id').primaryKey(),
+    // temporada em que a partida foi jogada; usado pra agregar o ranking do board
+    seasonId: text('season_id').references(() => commanderSeasons.id, { onDelete: 'set null' }),
     status: text('status', { enum: ['active', 'ended'] }).notNull().default('active'),
     startingLife: integer('starting_life').notNull().default(40),
     startedAt: integer('started_at', { mode: 'timestamp_ms' }).notNull(),
@@ -404,6 +422,7 @@ export const commanderGames = sqliteTable(
   },
   (t) => ({
     statusIdx: index('commander_games_status_idx').on(t.status),
+    seasonIdx: index('commander_games_season_idx').on(t.seasonId),
   }),
 )
 
@@ -419,6 +438,8 @@ export const commanderGamePlayers = sqliteTable(
       .notNull()
       .references(() => commanderPlayers.id, { onDelete: 'restrict' }),
     life: integer('life').notNull(),
+    // posição final na partida (1 = venceu); preenchido ao encerrar o mesão
+    placement: integer('placement'),
     createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
     updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
   },
@@ -566,9 +587,14 @@ export const commanderPlayersRelations = relations(commanderPlayers, ({ many }) 
   gamePlayers: many(commanderGamePlayers),
 }))
 
-export const commanderGamesRelations = relations(commanderGames, ({ many }) => ({
+export const commanderSeasonsRelations = relations(commanderSeasons, ({ many }) => ({
+  games: many(commanderGames),
+}))
+
+export const commanderGamesRelations = relations(commanderGames, ({ many, one }) => ({
   gamePlayers: many(commanderGamePlayers),
   damageRequests: many(commanderDamageRequests),
+  season: one(commanderSeasons, { fields: [commanderGames.seasonId], references: [commanderSeasons.id] }),
 }))
 
 export const commanderGamePlayersRelations = relations(commanderGamePlayers, ({ one }) => ({

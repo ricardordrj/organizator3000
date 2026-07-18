@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react'
-import { SwordsIcon, FlagIcon, RadiationIcon } from 'lucide-react'
+import { SwordsIcon, FlagIcon, RadiationIcon, TrophyIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { useCommanderGame, useCommanderPlayers, useMyCommanderPlayerId } from '@/hooks'
 import { commanderGameService } from '@/services'
 import type { CommanderGamePlayer } from '@/models'
 import { ApiError } from '@/services/apiClient'
 import { Button } from '@/components/ui/button'
-import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 import { PlayerRoster } from '@/components/commander/PlayerRoster'
 import { StartGameDialog } from '@/components/commander/StartGameDialog'
 import { MyIdentityPicker } from '@/components/commander/MyIdentityPicker'
@@ -14,6 +13,8 @@ import { PlayerCard } from '@/components/commander/PlayerCard'
 import { SendDamageDialog } from '@/components/commander/SendDamageDialog'
 import { SendGlobalDamageDialog } from '@/components/commander/SendGlobalDamageDialog'
 import { PlayerDetailDialog } from '@/components/commander/PlayerDetailDialog'
+import { EndGameDialog } from '@/components/commander/EndGameDialog'
+import { LeaderboardDialog } from '@/components/commander/LeaderboardDialog'
 
 const ACTIVE_GAME_KEY = 'commander:active-game-id'
 
@@ -21,7 +22,8 @@ export function CommanderPage() {
   const [activeGameId, setActiveGameIdState] = useState<string | null>(() => localStorage.getItem(ACTIVE_GAME_KEY))
   const [checkingForActiveGame, setCheckingForActiveGame] = useState(false)
   const [startDialogOpen, setStartDialogOpen] = useState(false)
-  const [endConfirmOpen, setEndConfirmOpen] = useState(false)
+  const [endDialogOpen, setEndDialogOpen] = useState(false)
+  const [leaderboardOpen, setLeaderboardOpen] = useState(false)
   const [damageTarget, setDamageTarget] = useState<CommanderGamePlayer | null>(null)
   const [globalDamageOpen, setGlobalDamageOpen] = useState(false)
   const [detailPlayer, setDetailPlayer] = useState<CommanderGamePlayer | null>(null)
@@ -79,15 +81,10 @@ export function CommanderPage() {
     }
   }
 
-  async function handleEndGame() {
-    try {
-      await endGame()
-      setActiveGameId(null)
-    } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : 'Erro ao encerrar o mesão')
-    } finally {
-      setEndConfirmOpen(false)
-    }
+  async function handleEndGame(standings: string[]) {
+    await endGame(standings.length > 0 ? standings : undefined)
+    setActiveGameId(null)
+    toast.success('Mesão encerrado!')
   }
 
   const myPlayer = game?.players.find((p) => p.playerId === myPlayerId)
@@ -102,7 +99,13 @@ export function CommanderPage() {
           <SwordsIcon className="size-5 text-primary" />
           Mesão de Commander
         </h2>
-        <MyIdentityPicker />
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setLeaderboardOpen(true)}>
+            <TrophyIcon className="size-4" />
+            Ranking
+          </Button>
+          <MyIdentityPicker />
+        </div>
       </div>
 
       {!activeGameId ? (
@@ -147,7 +150,7 @@ export function CommanderPage() {
                 Dano global
               </Button>
             )}
-            <Button variant="outline" size="sm" onClick={() => setEndConfirmOpen(true)}>
+            <Button variant="outline" size="sm" onClick={() => setEndDialogOpen(true)}>
               <FlagIcon className="size-4" />
               Encerrar mesão
             </Button>
@@ -190,14 +193,16 @@ export function CommanderPage() {
         />
       )}
 
-      <ConfirmDialog
-        open={endConfirmOpen}
-        onOpenChange={setEndConfirmOpen}
-        title="Encerrar mesão"
-        description="Isso finaliza a mesa pra todo mundo. Tem certeza?"
-        confirmLabel="Encerrar"
-        onConfirm={handleEndGame}
-      />
+      {game && (
+        <EndGameDialog
+          open={endDialogOpen}
+          onOpenChange={setEndDialogOpen}
+          players={game.players}
+          onEnd={handleEndGame}
+        />
+      )}
+
+      <LeaderboardDialog open={leaderboardOpen} onOpenChange={setLeaderboardOpen} />
     </div>
   )
 }
