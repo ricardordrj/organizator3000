@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { PlusIcon } from 'lucide-react'
+import { PlusIcon, CpuIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { useUpgradePhases, useUpgradeItems } from '@/hooks'
 import type { UpgradePhase, UpgradeItem } from '@/models'
@@ -107,7 +107,10 @@ export function UpgradePlanPage() {
   return (
     <section className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-xl font-semibold">Upgrade de PC</h2>
+        <h2 className="flex items-center gap-2 text-xl font-semibold">
+          <CpuIcon className="size-5 text-primary" />
+          Upgrade de PC
+        </h2>
         <Button onClick={openCreatePhase}>
           <PlusIcon className="size-4" />
           Nova fase

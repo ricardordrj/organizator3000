@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { AppProvider } from '@/context/AppProvider'
 import { AppLayout } from '@/components/layout/AppLayout'
@@ -8,8 +8,8 @@ import { TaskDetailPage } from '@/pages/TaskDetailPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { CadastrosPage } from '@/pages/CadastrosPage'
 import { FinancesPage } from '@/pages/FinancesPage'
-import { RoadmapPage } from '@/pages/RoadmapPage'
 import { UpgradePlanPage } from '@/pages/UpgradePlanPage'
+import { DarkFantasyPage } from '@/pages/DarkFantasyPage'
 import { useTheme } from '@/hooks'
 
 function AppToaster() {
@@ -28,9 +28,10 @@ function App() {
             <Route path="tasks/:id" element={<TaskDetailPage />} />
             <Route path="cadastros" element={<CadastrosPage />} />
             <Route path="financas" element={<FinancesPage />} />
-            <Route path="roadmap" element={<RoadmapPage />} />
             <Route path="upgrade-pc" element={<UpgradePlanPage />} />
+            <Route path="dark-fantasy" element={<DarkFantasyPage />} />
             <Route path="settings" element={<SettingsPage />} />
+            <Route path="roadmap" element={<Navigate to="/settings" replace />} />
           </Route>
         </Routes>
       </BrowserRouter>

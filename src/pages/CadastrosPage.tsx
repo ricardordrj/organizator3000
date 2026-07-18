@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { UsersIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { TagManager } from '@/components/cadastros/TagManager'
 import { PersonManager } from '@/components/cadastros/PersonManager'
@@ -16,7 +17,10 @@ export function CadastrosPage() {
 
   return (
     <section className="space-y-6">
-      <h2 className="text-xl font-semibold">Cadastros</h2>
+      <h2 className="flex items-center gap-2 text-xl font-semibold">
+        <UsersIcon className="size-5 text-primary" />
+        Cadastros
+      </h2>
 
       <nav className="flex flex-wrap gap-1 border-b pb-2">
         {TABS.map((t) => (

@@ -207,3 +207,30 @@ export const updateUpgradeItemInputSchema = z.object({
   orderIndex: z.coerce.number().int().optional(),
 })
 export type UpdateUpgradeItemInput = z.infer<typeof updateUpgradeItemInputSchema>
+
+export const createLoreCategoryInputSchema = z.object({
+  title: z.string().min(1, 'Título é obrigatório'),
+})
+export type CreateLoreCategoryInput = z.infer<typeof createLoreCategoryInputSchema>
+
+export const updateLoreCategoryInputSchema = z.object({
+  title: z.string().min(1).optional(),
+  orderIndex: z.coerce.number().int().optional(),
+})
+export type UpdateLoreCategoryInput = z.infer<typeof updateLoreCategoryInputSchema>
+
+export const createLoreEntryInputSchema = z.object({
+  categoryId: z.string().min(1, 'Categoria é obrigatória'),
+  title: z.string().min(1, 'Título é obrigatório'),
+  content: z.string().min(1, 'Conteúdo é obrigatório'),
+  images: z.array(z.string().url()).default([]),
+})
+export type CreateLoreEntryInput = z.infer<typeof createLoreEntryInputSchema>
+
+export const updateLoreEntryInputSchema = z.object({
+  title: z.string().min(1).optional(),
+  content: z.string().min(1).optional(),
+  images: z.array(z.string().url()).optional(),
+  orderIndex: z.coerce.number().int().optional(),
+})
+export type UpdateLoreEntryInput = z.infer<typeof updateLoreEntryInputSchema>

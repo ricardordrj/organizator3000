@@ -11,6 +11,8 @@ import {
   financeProfileService,
   upgradePhaseService,
   upgradeItemService,
+  loreCategoryService,
+  loreEntryService,
 } from '@/services'
 import { createUiSlice } from './slices/uiSlice'
 import { createTaskSlice } from './slices/taskSlice'
@@ -23,6 +25,8 @@ import { createMealVoucherPurchaseSlice } from './slices/mealVoucherPurchaseSlic
 import { createFinanceProfileSlice } from './slices/financeProfileSlice'
 import { createUpgradePhaseSlice } from './slices/upgradePhaseSlice'
 import { createUpgradeItemSlice } from './slices/upgradeItemSlice'
+import { createLoreCategorySlice } from './slices/loreCategorySlice'
+import { createLoreEntrySlice } from './slices/loreEntrySlice'
 import type { AppState } from './types'
 
 export const useAppStore = create<AppState>()((set, get, api) => ({
@@ -37,6 +41,8 @@ export const useAppStore = create<AppState>()((set, get, api) => ({
   ...createFinanceProfileSlice(set, get, api),
   ...createUpgradePhaseSlice(set, get, api),
   ...createUpgradeItemSlice(set, get, api),
+  ...createLoreCategorySlice(set, get, api),
+  ...createLoreEntrySlice(set, get, api),
   hydrate: async () => {
     const [
       settings,
@@ -50,6 +56,8 @@ export const useAppStore = create<AppState>()((set, get, api) => ({
       financeProfiles,
       upgradePhases,
       upgradeItems,
+      loreCategories,
+      loreEntries,
     ] = await Promise.all([
       settingsService.get(),
       taskService.list(),
@@ -62,6 +70,8 @@ export const useAppStore = create<AppState>()((set, get, api) => ({
       financeProfileService.list(),
       upgradePhaseService.list(),
       upgradeItemService.list(),
+      loreCategoryService.list(),
+      loreEntryService.list(),
     ])
     set({
       settings,
@@ -75,6 +85,8 @@ export const useAppStore = create<AppState>()((set, get, api) => ({
       financeProfiles,
       upgradePhases,
       upgradeItems,
+      loreCategories,
+      loreEntries,
       isHydrated: true,
     })
     const currentActiveId = get().activeFinanceProfileId

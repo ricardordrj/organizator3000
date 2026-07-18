@@ -233,3 +233,16 @@
     animation: none !important;
   }
 }
+
+/*
+ * Defensive fallback for the same wedged-animation scenario above: even if the
+ * exit animation gets stuck and the element never unmounts, `data-closed` is
+ * set synchronously by React (not tied to the animation), so this guarantees
+ * a closed overlay/popup can never keep intercepting clicks and soft-locking
+ * the page underneath it.
+ */
+[data-slot="dialog-overlay"][data-closed],
+[data-slot="dialog-content"][data-closed],
+[data-slot="popover-content"][data-closed] {
+  pointer-events: none !important;
+}

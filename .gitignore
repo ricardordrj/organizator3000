@@ -37,5 +37,4 @@ server/.env
 .claude/settings.local.json
 
 # SSH keys generated for deploy — never commit private keys
-deploy_key
-deploy_key.pub
+deploy_key*

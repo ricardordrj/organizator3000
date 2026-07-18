@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { PlusIcon } from 'lucide-react'
+import { PlusIcon, ListTodoIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTasks, useDebouncedValue } from '@/hooks'
 import { ApiError } from '@/services/apiClient'
@@ -64,7 +64,10 @@ export function TasksPage() {
   return (
     <section className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-xl font-semibold">Tarefas</h2>
+        <h2 className="flex items-center gap-2 text-xl font-semibold">
+          <ListTodoIcon className="size-5 text-primary" />
+          Tarefas
+        </h2>
         <Button onClick={() => setCreateOpen(true)}>
           <PlusIcon className="size-4" />
           Nova tarefa

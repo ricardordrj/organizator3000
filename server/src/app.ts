@@ -18,6 +18,8 @@ import { incomeRoutes } from './routes/incomes.routes.js'
 import { mealVoucherPurchaseRoutes } from './routes/mealVoucherPurchases.routes.js'
 import { upgradePhaseRoutes } from './routes/upgradePhases.routes.js'
 import { upgradeItemRoutes } from './routes/upgradeItems.routes.js'
+import { loreCategoryRoutes } from './routes/loreCategories.routes.js'
+import { loreEntryRoutes } from './routes/loreEntries.routes.js'
 import { registerStatic } from './plugins/static.js'
 
 export function buildApp() {
@@ -54,6 +56,8 @@ export function buildApp() {
   app.register(mealVoucherPurchaseRoutes, { prefix: '/api' })
   app.register(upgradePhaseRoutes, { prefix: '/api' })
   app.register(upgradeItemRoutes, { prefix: '/api' })
+  app.register(loreCategoryRoutes, { prefix: '/api' })
+  app.register(loreEntryRoutes, { prefix: '/api' })
 
   if (env.NODE_ENV === 'production') {
     app.register(registerStatic)

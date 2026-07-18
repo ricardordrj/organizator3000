@@ -1,13 +1,16 @@
-import { useState } from 'react'
-import { AlertTriangleIcon, BanIcon, ClockIcon, ListTodoIcon } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { AlertTriangleIcon, BanIcon, CalendarClockIcon, ClockIcon, ListTodoIcon, LayoutDashboardIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTasks } from '@/hooks'
 import type { Task } from '@/models'
 import { ApiError } from '@/services/apiClient'
-import { formatTimeRemaining } from '@/utils/date.utils'
+import { formatDate, formatTimeRemaining } from '@/utils/date.utils'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { RescheduleDeadlineDialog } from '@/components/tasks/RescheduleDeadlineDialog'
+
+const UPCOMING_LIMIT = 4
 
 export function DashboardPage() {
   const { tasks, editTask } = useTasks()
@@ -17,6 +20,13 @@ export function DashboardPage() {
   const blockedCount = tasks.filter(({ task }) => task.isBlocked).length
   const overdueTasks = tasks.filter(({ urgency }) => urgency.level === 'overdue')
   const warningTasks = tasks.filter(({ urgency }) => urgency.level === 'warning')
+  const upcomingTasks = useMemo(
+    () =>
+      tasks
+        .filter(({ urgency }) => urgency.level === 'ok' && urgency.msRemaining !== null)
+        .slice(0, UPCOMING_LIMIT),
+    [tasks],
+  )
 
   const stats = [
     { label: 'Tarefas', value: tasks.length, icon: ListTodoIcon },
@@ -38,7 +48,10 @@ export function DashboardPage() {
 
   return (
     <section className="space-y-6">
-      <h2 className="text-xl font-semibold">Visão geral</h2>
+      <h2 className="flex items-center gap-2 text-xl font-semibold">
+        <LayoutDashboardIcon className="size-5 text-primary" />
+        Visão geral
+      </h2>
 
       {overdueTasks.length > 0 && (
         <Card className="border-red-500/40 bg-red-500/10">
@@ -85,6 +98,35 @@ export function DashboardPage() {
                   <Button variant="outline" size="sm" onClick={() => setRescheduleTask(task)}>
                     Adiar prazo
                   </Button>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+
+      {upcomingTasks.length > 0 && (
+        <Card>
+          <CardContent className="space-y-2">
+            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+              <CalendarClockIcon className="size-4" />
+              Próximos prazos
+            </div>
+            <ul className="space-y-1.5">
+              {upcomingTasks.map(({ task, urgency }) => (
+                <li key={task.id}>
+                  <Link
+                    to={`/tasks/${task.id}`}
+                    className="flex items-center justify-between gap-2 rounded-md px-1.5 py-1 text-sm hover:bg-muted"
+                  >
+                    <span className="truncate">{task.title}</span>
+                    {task.deadline && (
+                      <span className="shrink-0 text-xs text-muted-foreground">
+                        {formatDate(task.deadline)}
+                        {urgency.msRemaining !== null && ` · ${formatTimeRemaining(urgency.msRemaining)}`}
+                      </span>
+                    )}
+                  </Link>
                 </li>
               ))}
             </ul>

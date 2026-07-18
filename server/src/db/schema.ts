@@ -301,6 +301,42 @@ export const upgradeItems = sqliteTable(
   }),
 )
 
+// ---------- lore_categories (seções do wiki de world-building — Dark Fantasy) ----------
+export const loreCategories = sqliteTable(
+  'lore_categories',
+  {
+    id: text('id').primaryKey(),
+    title: text('title').notNull(),
+    orderIndex: integer('order_index').notNull(),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+    updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
+  },
+  (t) => ({
+    orderIdx: index('lore_categories_order_idx').on(t.orderIndex),
+  }),
+)
+
+// ---------- lore_entries (páginas dentro de cada categoria do wiki) ----------
+export const loreEntries = sqliteTable(
+  'lore_entries',
+  {
+    id: text('id').primaryKey(),
+    categoryId: text('category_id')
+      .notNull()
+      .references(() => loreCategories.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    content: text('content').notNull(),
+    imagesJson: text('images_json', { mode: 'json' }).$type<string[]>().notNull(),
+    orderIndex: integer('order_index').notNull(),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+    updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
+  },
+  (t) => ({
+    categoryIdx: index('lore_entries_category_idx').on(t.categoryId),
+    orderIdx: index('lore_entries_order_idx').on(t.orderIndex),
+  }),
+)
+
 // ---------- settings (linha única, id=1, sem auth) ----------
 export const settings = sqliteTable('settings', {
   id: integer('id').primaryKey(),
@@ -388,4 +424,12 @@ export const upgradePhasesRelations = relations(upgradePhases, ({ many }) => ({
 
 export const upgradeItemsRelations = relations(upgradeItems, ({ one }) => ({
   phase: one(upgradePhases, { fields: [upgradeItems.phaseId], references: [upgradePhases.id] }),
+}))
+
+export const loreCategoriesRelations = relations(loreCategories, ({ many }) => ({
+  entries: many(loreEntries),
+}))
+
+export const loreEntriesRelations = relations(loreEntries, ({ one }) => ({
+  category: one(loreCategories, { fields: [loreEntries.categoryId], references: [loreCategories.id] }),
 }))

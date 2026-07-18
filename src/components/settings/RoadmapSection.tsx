@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import type { ReactNode } from 'react'
 import { CircleIcon, SquareCheckIcon, SquareIcon } from 'lucide-react'
-import roadmapRaw from '../../ROADMAP.md?raw'
+import roadmapRaw from '../../../ROADMAP.md?raw'
 import { parseRoadmap } from '@/lib/roadmap'
 import type { RoadmapItem } from '@/lib/roadmap'
 import { cn } from '@/lib/utils'
@@ -20,7 +20,7 @@ function renderInline(text: string): ReactNode[] {
       parts.push(<strong key={key++}>{match[1]}</strong>)
     } else if (match[2] !== undefined) {
       parts.push(
-        <code key={key++} className="rounded bg-muted px-1 py-0.5 text-xs">
+        <code key={key++} className="rounded bg-muted px-1 py-0.5 text-xs break-words">
           {match[2]}
         </code>,
       )
@@ -42,7 +42,7 @@ function RoadmapItemRow({ item }: { item: RoadmapItem }) {
         ) : (
           <SquareIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
         )}
-        <span className={cn(item.checked && 'text-muted-foreground line-through')}>
+        <span className={cn('min-w-0 break-words', item.checked && 'text-muted-foreground line-through')}>
           {renderInline(item.text)}
         </span>
       </div>
@@ -57,15 +57,12 @@ function RoadmapItemRow({ item }: { item: RoadmapItem }) {
   )
 }
 
-export function RoadmapPage() {
+export function RoadmapSection() {
   const doc = useMemo(() => parseRoadmap(roadmapRaw), [])
 
   return (
-    <section className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold">{doc.title || 'Roadmap'}</h2>
-        {doc.intro && <p className="mt-1 text-sm text-muted-foreground">{doc.intro}</p>}
-      </div>
+    <div className="space-y-4">
+      {doc.intro && <p className="text-sm text-muted-foreground">{doc.intro}</p>}
 
       {doc.sections.map((section) => (
         <Card key={section.title}>
@@ -85,6 +82,6 @@ export function RoadmapPage() {
           </CardContent>
         </Card>
       ))}
-    </section>
+    </div>
   )
 }

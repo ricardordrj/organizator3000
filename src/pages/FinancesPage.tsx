@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { isSameMonth } from 'date-fns'
-import { PlusIcon, XIcon } from 'lucide-react'
+import { PlusIcon, XIcon, WalletIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { useExpenses, useSavingsGoals, useIncomes, useMealVoucherPurchases, useFinanceProfiles } from '@/hooks'
 import type { Expense, SavingsGoal, Income } from '@/models'
@@ -155,7 +155,10 @@ export function FinancesPage() {
   return (
     <section className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-xl font-semibold">Finanças</h2>
+        <h2 className="flex items-center gap-2 text-xl font-semibold">
+          <WalletIcon className="size-5 text-primary" />
+          Finanças
+        </h2>
         <div className="flex flex-wrap items-center gap-2">
           <FinanceProfileSelector />
           <Button onClick={openCreateExpense}>

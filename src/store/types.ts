@@ -31,6 +31,12 @@ import type {
   UpgradeItem,
   CreateUpgradeItemInput,
   UpdateUpgradeItemInput,
+  LoreCategory,
+  CreateLoreCategoryInput,
+  UpdateLoreCategoryInput,
+  LoreEntry,
+  CreateLoreEntryInput,
+  UpdateLoreEntryInput,
 } from '@/models'
 
 export interface UiSlice {
@@ -122,6 +128,20 @@ export interface UpgradeItemSlice {
   removeUpgradeItem: (id: string) => Promise<void>
 }
 
+export interface LoreCategorySlice {
+  loreCategories: LoreCategory[]
+  addLoreCategory: (input: CreateLoreCategoryInput) => Promise<LoreCategory>
+  editLoreCategory: (id: string, patch: UpdateLoreCategoryInput) => Promise<void>
+  removeLoreCategory: (id: string) => Promise<void>
+}
+
+export interface LoreEntrySlice {
+  loreEntries: LoreEntry[]
+  addLoreEntry: (input: CreateLoreEntryInput) => Promise<LoreEntry>
+  editLoreEntry: (id: string, patch: UpdateLoreEntryInput) => Promise<void>
+  removeLoreEntry: (id: string) => Promise<void>
+}
+
 export interface AppState
   extends UiSlice,
     TaskSlice,
@@ -133,6 +153,8 @@ export interface AppState
     MealVoucherPurchaseSlice,
     FinanceProfileSlice,
     UpgradePhaseSlice,
-    UpgradeItemSlice {
+    UpgradeItemSlice,
+    LoreCategorySlice,
+    LoreEntrySlice {
   hydrate: () => Promise<void>
 }
