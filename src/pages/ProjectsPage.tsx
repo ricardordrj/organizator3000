@@ -26,7 +26,7 @@ const kindTabs: { kind: LoreCategoryKind; label: string; icon: typeof SkullIcon 
   { kind: 'personal_project', label: 'Projetos Pessoais', icon: FolderKanbanIcon },
 ]
 
-export function DarkFantasyPage() {
+export function ProjectsPage() {
   const { loreCategories, removeLoreCategory } = useLoreCategories()
   const { loreEntries, removeLoreEntry } = useLoreEntries()
 

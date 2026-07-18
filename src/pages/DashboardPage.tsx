@@ -212,7 +212,7 @@ export function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Link to="/upgrade-pc">
+        <Link to="/compras" state={{ tab: 'upgrade-pc' }}>
           <Card className="transition-colors hover:bg-muted/50">
             <CardContent className="flex items-center justify-between gap-2">
               <div>
@@ -225,7 +225,7 @@ export function DashboardPage() {
             </CardContent>
           </Card>
         </Link>
-        <Link to="/compras">
+        <Link to="/compras" state={{ tab: 'lista' }}>
           <Card className="transition-colors hover:bg-muted/50">
             <CardContent className="flex items-center justify-between gap-2">
               <div>

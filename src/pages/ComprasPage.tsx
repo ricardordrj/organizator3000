@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
-import { PlusIcon, ShoppingCartIcon } from 'lucide-react'
+import { useLocation } from 'react-router-dom'
+import { PlusIcon, ShoppingCartIcon, CpuIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { useShoppingProfiles, useShoppingItems } from '@/hooks'
 import type { ShoppingItem } from '@/models'
@@ -14,8 +15,16 @@ import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 import { ShoppingProfileSelector } from '@/components/shopping/ShoppingProfileSelector'
 import { ShoppingItemFormDialog } from '@/components/shopping/ShoppingItemFormDialog'
 import { urgencyLabels, urgencyBadgeClassNames, urgencyOrder } from '@/components/shopping/shoppingLabels'
+import { UpgradePlanPage } from '@/pages/UpgradePlanPage'
 
-export function ShoppingListPage() {
+type ComprasTab = 'lista' | 'upgrade-pc'
+
+const comprasTabs: { tab: ComprasTab; label: string; icon: typeof ShoppingCartIcon }[] = [
+  { tab: 'lista', label: 'Lista de Compras', icon: ShoppingCartIcon },
+  { tab: 'upgrade-pc', label: 'Upgrade PC', icon: CpuIcon },
+]
+
+function ShoppingListSection() {
   const { activeShoppingProfileId } = useShoppingProfiles()
   const { shoppingItems: allItems, toggleShoppingItem, removeShoppingItem } = useShoppingItems()
 
@@ -169,5 +178,36 @@ export function ShoppingListPage() {
         onConfirm={handleRemoveItem}
       />
     </section>
+  )
+}
+
+export function ComprasPage() {
+  const location = useLocation()
+  const initialTab = (location.state as { tab?: ComprasTab } | null)?.tab ?? 'lista'
+  const [activeTab, setActiveTab] = useState<ComprasTab>(initialTab)
+
+  return (
+    <div className="space-y-4">
+      <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
+        {comprasTabs.map((tab) => (
+          <button
+            key={tab.tab}
+            type="button"
+            onClick={() => setActiveTab(tab.tab)}
+            className={cn(
+              'flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium tracking-wide whitespace-nowrap transition-colors',
+              tab.tab === activeTab
+                ? 'bg-gradient-to-r from-primary/25 to-accent/25 text-foreground ring-1 ring-primary/50'
+                : 'bg-muted text-muted-foreground hover:text-foreground',
+            )}
+          >
+            <tab.icon className="size-3.5" />
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === 'lista' ? <ShoppingListSection /> : <UpgradePlanPage />}
+    </div>
   )
 }
