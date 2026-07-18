@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Loader2Icon } from 'lucide-react'
 import { useAppStore } from '@/store/useAppStore'
+import { authService } from '@/services'
+import type { CurrentUser } from '@/services'
 import { AppContext } from './appContext'
 import type { AppContextValue } from './appContext'
 
@@ -19,14 +21,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const isHydrated = useAppStore((state) => state.isHydrated)
   const theme = useAppStore((state) => state.settings.theme)
   const [isServerUnreachable, setIsServerUnreachable] = useState(false)
+  const [user, setUser] = useState<CurrentUser | null>(null)
+  const [isReady, setIsReady] = useState(false)
 
   useEffect(() => {
-    hydrate()
-      .then(() => setIsServerUnreachable(false))
+    // Primeiro descobre quem está logado (via Cloudflare Access). Admin puxa o
+    // app inteiro; quem é do mesão pula o hydrate pesado — a tela do mesão
+    // carrega os próprios dados e as demais APIs seriam negadas de qualquer forma.
+    authService
+      .me()
+      .then(async (currentUser) => {
+        setUser(currentUser)
+        if (currentUser.role === 'admin') {
+          await hydrate()
+        }
+        setIsServerUnreachable(false)
+      })
       .catch((error) => {
         console.error('Falha ao carregar dados do servidor', error)
         setIsServerUnreachable(true)
       })
+      .finally(() => setIsReady(true))
   }, [hydrate])
 
   useEffect(() => {
@@ -36,13 +51,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [theme])
 
   const value = useMemo<AppContextValue>(
-    () => ({ isHydrated, isServerUnreachable }),
-    [isHydrated, isServerUnreachable],
+    () => ({ isHydrated, isServerUnreachable, user }),
+    [isHydrated, isServerUnreachable, user],
   )
 
   return (
     <AppContext.Provider value={value}>
-      {!isHydrated && !isServerUnreachable ? (
+      {!isReady && !isServerUnreachable ? (
         <AppLoader />
       ) : (
         <>

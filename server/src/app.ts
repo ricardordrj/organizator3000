@@ -3,6 +3,7 @@ import type { FastifyError } from 'fastify'
 import cors from '@fastify/cors'
 import multipart from '@fastify/multipart'
 import { HttpError } from './lib/errors.js'
+import { resolveIdentity } from './lib/auth.js'
 import { env } from './env.js'
 import { MAX_FILE_SIZE_BYTES } from './lib/uploadValidation.js'
 import { taskRoutes } from './routes/tasks.routes.js'
@@ -46,6 +47,38 @@ export function buildApp() {
   })
 
   app.get('/api/health', async () => ({ status: 'ok' }))
+
+  // Autorização por identidade da Cloudflare Access. Só protege a API; os
+  // arquivos estáticos já ficam atrás do login do Access no nível do domínio.
+  // Admin acessa tudo; qualquer outro logado só alcança as rotas do mesão.
+  app.addHook('onRequest', async (request, reply) => {
+    const url = request.raw.url ?? ''
+    if (!url.startsWith('/api')) return
+    // Health check roda direto no localhost (sem Cloudflare) — deixa passar.
+    if (url === '/api/health' || url.startsWith('/api/health?')) return
+
+    const identity = await resolveIdentity(request)
+    if (!identity) {
+      reply.code(401).send({ error: 'Não autenticado' })
+      return
+    }
+    request.identity = identity
+
+    // Quem sou eu: qualquer usuário autenticado pode consultar.
+    if (url === '/api/me' || url.startsWith('/api/me?')) return
+
+    if (identity.role === 'admin') return
+
+    const isCommanderRoute = url.startsWith('/api/commander-')
+    if (isCommanderRoute) return
+
+    reply.code(403).send({ error: 'Acesso restrito ao mesão' })
+  })
+
+  app.get('/api/me', async (request) => {
+    const identity = request.identity!
+    return { email: identity.email, role: identity.role }
+  })
 
   app.register(taskRoutes, { prefix: '/api' })
   app.register(settingsRoutes, { prefix: '/api' })
