@@ -172,6 +172,8 @@ export interface ShoppingItemSlice {
 
 export interface CommanderPlayerSlice {
   commanderPlayers: CommanderPlayer[]
+  commanderPlayersLoaded: boolean
+  loadCommanderPlayers: () => Promise<void>
   addCommanderPlayer: (input: CreateCommanderPlayerInput) => Promise<CommanderPlayer>
   editCommanderPlayer: (id: string, patch: UpdateCommanderPlayerInput) => Promise<void>
   removeCommanderPlayer: (id: string) => Promise<void>

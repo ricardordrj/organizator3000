@@ -4,6 +4,11 @@ import type { AppState, CommanderPlayerSlice } from '../types'
 
 export const createCommanderPlayerSlice: StateCreator<AppState, [], [], CommanderPlayerSlice> = (set, get) => ({
   commanderPlayers: [],
+  commanderPlayersLoaded: false,
+  loadCommanderPlayers: async () => {
+    const commanderPlayers = await commanderPlayerService.list()
+    set({ commanderPlayers, commanderPlayersLoaded: true })
+  },
   addCommanderPlayer: async (input) => {
     const player = await commanderPlayerService.create(input)
     set({ commanderPlayers: [...get().commanderPlayers, player] })

@@ -15,7 +15,6 @@ import {
   loreEntryService,
   shoppingProfileService,
   shoppingItemService,
-  commanderPlayerService,
 } from '@/services'
 import { createUiSlice } from './slices/uiSlice'
 import { createTaskSlice } from './slices/taskSlice'
@@ -69,7 +68,6 @@ export const useAppStore = create<AppState>()((set, get, api) => ({
       loreEntries,
       shoppingProfiles,
       shoppingItems,
-      commanderPlayers,
     ] = await Promise.all([
       settingsService.get(),
       taskService.list(),
@@ -86,7 +84,6 @@ export const useAppStore = create<AppState>()((set, get, api) => ({
       loreEntryService.list(),
       shoppingProfileService.list(),
       shoppingItemService.list(),
-      commanderPlayerService.list(),
     ])
     set({
       settings,
@@ -104,7 +101,6 @@ export const useAppStore = create<AppState>()((set, get, api) => ({
       loreEntries,
       shoppingProfiles,
       shoppingItems,
-      commanderPlayers,
       isHydrated: true,
     })
     const currentActiveId = get().activeFinanceProfileId

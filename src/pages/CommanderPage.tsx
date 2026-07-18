@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { SwordsIcon, FlagIcon } from 'lucide-react'
 import { toast } from 'sonner'
-import { useCommanderGame, useMyCommanderPlayerId } from '@/hooks'
+import { useCommanderGame, useCommanderPlayers, useMyCommanderPlayerId } from '@/hooks'
 import { commanderGameService } from '@/services'
 import type { CommanderGamePlayer } from '@/models'
 import { ApiError } from '@/services/apiClient'
@@ -26,6 +26,13 @@ export function CommanderPage() {
 
   const { myPlayerId } = useMyCommanderPlayerId()
   const { game, sendDamageRequest, resolveDamageRequest, endGame } = useCommanderGame(activeGameId)
+  const { commanderPlayersLoaded, loadCommanderPlayers } = useCommanderPlayers()
+
+  // Carrega os jogadores fixos sozinho, sem depender do hydrate geral do app —
+  // essencial pra funcionar num acesso restrito só a /mesao (ver ROADMAP.md).
+  useEffect(() => {
+    if (!commanderPlayersLoaded) loadCommanderPlayers()
+  }, [commanderPlayersLoaded, loadCommanderPlayers])
 
   function setActiveGameId(id: string | null) {
     if (id) localStorage.setItem(ACTIVE_GAME_KEY, id)
