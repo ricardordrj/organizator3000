@@ -14,6 +14,13 @@ Lista de melhorias planejadas para o organizador pessoal. Conforme forem sendo u
 
 ## Próximas melhorias (confirmadas)
 
+- [ ] **Mesão de Commander — contador de vida em `/mesao`** — pra usar direto no celular durante as partidas com Marchesi, Gabigol, Serjão, Daniel e Ricardo (uso esperado: 1-2x/mês). Dinâmica decidida:
+  - [x] Jogadores fixos (perfis reaproveitados entre mesões, com foto/avatar e cor próprios, editáveis aos poucos)
+  - [x] Cada um só mexe na própria vida diretamente; dano de outro jogador vira **solicitação pendente** até quem tomou confirmar, ajustar o valor ou descartar — resolve o caso de "calculou errado enquanto conversava"
+  - [x] Card do jogador mostra a vida; abrindo o detalhe dá pra ver o dano de comandante recebido de cada oponente (barra até 21, a régua de "quase morrendo de comandante") e o histórico da mesa
+  - [x] Visual com ícones (espada pra combate, coroa pra comandante) e feedback ao vivo (número da vida pisca ao mudar)
+  - [x] Sincronização entre celulares por polling (a cada ~1.5s), simples o bastante pro volume de uso — sem necessidade de websocket
+  - [ ] **Acesso/login pendente de decisão**: protótipo atual roda **sem nenhuma proteção** (rota `/mesao` aberta), só pra validar a dinâmica jogando em casa de amigo. Antes de expor de verdade, decidir entre: reaproveitar o "Proteger o acesso (Cloudflare Access)" já planejado acima (login Google + email OTP) — a opção mais provável já que o resto do site vai usar isso mesmo — ou, se o mesão continuar restrito à rede local durante as partidas, nem precisar de login próprio.
 - [ ] **Utilitários de dev**
   - [ ] Templates de tarefa para tipos recorrentes (bug, feature, etc.)
   - [ ] Atalho de teclado (Cmd/Ctrl+K) para criar tarefa rápida ou buscar

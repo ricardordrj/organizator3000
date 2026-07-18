@@ -10,6 +10,7 @@ import { CadastrosPage } from '@/pages/CadastrosPage'
 import { FinancesPage } from '@/pages/FinancesPage'
 import { ProjectsPage } from '@/pages/ProjectsPage'
 import { ComprasPage } from '@/pages/ComprasPage'
+import { CommanderPage } from '@/pages/CommanderPage'
 import { useTheme } from '@/hooks'
 
 function AppToaster() {
@@ -30,6 +31,7 @@ function App() {
             <Route path="financas" element={<FinancesPage />} />
             <Route path="compras" element={<ComprasPage />} />
             <Route path="projetos" element={<ProjectsPage />} />
+            <Route path="mesao" element={<CommanderPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="roadmap" element={<Navigate to="/settings" replace />} />
             <Route path="upgrade-pc" element={<Navigate to="/compras" replace state={{ tab: 'upgrade-pc' }} />} />

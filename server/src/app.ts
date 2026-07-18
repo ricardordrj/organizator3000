@@ -22,6 +22,8 @@ import { loreCategoryRoutes } from './routes/loreCategories.routes.js'
 import { loreEntryRoutes } from './routes/loreEntries.routes.js'
 import { shoppingProfileRoutes } from './routes/shoppingProfiles.routes.js'
 import { shoppingItemRoutes } from './routes/shoppingItems.routes.js'
+import { commanderPlayerRoutes } from './routes/commanderPlayers.routes.js'
+import { commanderGameRoutes } from './routes/commanderGames.routes.js'
 import { registerStatic } from './plugins/static.js'
 
 export function buildApp() {
@@ -62,6 +64,8 @@ export function buildApp() {
   app.register(loreEntryRoutes, { prefix: '/api' })
   app.register(shoppingProfileRoutes, { prefix: '/api' })
   app.register(shoppingItemRoutes, { prefix: '/api' })
+  app.register(commanderPlayerRoutes, { prefix: '/api' })
+  app.register(commanderGameRoutes, { prefix: '/api' })
 
   if (env.NODE_ENV === 'production') {
     app.register(registerStatic)

@@ -8,6 +8,7 @@ import {
   ShoppingCartIcon,
   SettingsIcon,
   MoreHorizontalIcon,
+  SwordsIcon,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -28,6 +29,7 @@ const navItems: NavItem[] = [
   { to: '/financas', label: 'Finanças', end: false, icon: WalletIcon },
   { to: '/compras', label: 'Compras', end: false, icon: ShoppingCartIcon },
   { to: '/projetos', label: 'Projetos', end: false, icon: FolderKanbanIcon },
+  { to: '/mesao', label: 'Mesão', end: false, icon: SwordsIcon },
   { to: '/settings', label: 'Configurações', end: false, icon: SettingsIcon },
   { to: '/cadastros', label: 'Cadastros', end: false, icon: UsersIcon },
 ]
