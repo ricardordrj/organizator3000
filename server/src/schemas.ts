@@ -286,6 +286,17 @@ export const createCommanderGameInputSchema = z.object({
 })
 export type CreateCommanderGameInput = z.infer<typeof createCommanderGameInputSchema>
 
+export const endCommanderGameInputSchema = z.object({
+  // ordem de colocação: primeiro id = 1º lugar. Opcional (dá pra encerrar sem ranquear).
+  standings: z.array(z.string().min(1)).optional(),
+})
+export type EndCommanderGameInput = z.infer<typeof endCommanderGameInputSchema>
+
+export const resetCommanderSeasonInputSchema = z.object({
+  name: z.string().min(1).optional(),
+})
+export type ResetCommanderSeasonInput = z.infer<typeof resetCommanderSeasonInputSchema>
+
 export const commanderDamageTypeSchema = z.enum(['combat', 'commander', 'life_adjust', 'other'])
 
 export const createCommanderDamageRequestInputSchema = z.object({

@@ -21,6 +21,7 @@ export const commanderGamePlayerSchema = z.object({
   colorHex: z.string().optional(),
   avatarUrl: z.string().optional(),
   life: z.number(),
+  placement: z.number().optional(),
 })
 export type CommanderGamePlayer = z.infer<typeof commanderGamePlayerSchema>
 
@@ -63,12 +64,18 @@ export const commanderDamageMatrixEntrySchema = z.object({
 export type CommanderDamageMatrixEntry = z.infer<typeof commanderDamageMatrixEntrySchema>
 
 export const commanderGameDetailSchema = commanderGameSummarySchema.extend({
+  seasonId: z.uuid().optional(),
   players: z.array(commanderGamePlayerSchema),
   pendingRequests: z.array(commanderDamageRequestSchema),
   history: z.array(commanderDamageHistoryEntrySchema),
   commanderDamage: z.array(commanderDamageMatrixEntrySchema),
 })
 export type CommanderGameDetail = z.infer<typeof commanderGameDetailSchema>
+
+export const endCommanderGameInputSchema = z.object({
+  standings: z.array(z.string()).optional(),
+})
+export type EndCommanderGameInput = z.infer<typeof endCommanderGameInputSchema>
 
 export const createCommanderGameInputSchema = z.object({
   playerIds: z.array(z.string()).min(2, 'Selecione pelo menos 2 jogadores').max(6),

@@ -4,6 +4,7 @@ import type {
   CommanderGameDetail,
   CommanderDamageRequest,
   CreateCommanderGameInput,
+  EndCommanderGameInput,
   CreateCommanderDamageRequestInput,
   CreateCommanderGlobalDamageRequestInput,
   ResolveCommanderDamageRequestInput,
@@ -27,8 +28,8 @@ export const commanderGameService = {
     return commanderGameDetailSchema.parse(raw)
   },
 
-  async end(id: string): Promise<CommanderGameDetail> {
-    const raw = await apiClient.post<unknown>(`/commander-games/${id}/end`)
+  async end(id: string, input?: EndCommanderGameInput): Promise<CommanderGameDetail> {
+    const raw = await apiClient.post<unknown>(`/commander-games/${id}/end`, input ?? {})
     return commanderGameDetailSchema.parse(raw)
   },
 

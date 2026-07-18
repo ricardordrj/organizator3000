@@ -67,11 +67,14 @@ export function useCommanderGame(gameId: string | null) {
     [gameId, refresh],
   )
 
-  const endGame = useCallback(async () => {
-    if (!gameId) return
-    await commanderGameService.end(gameId)
-    await refresh()
-  }, [gameId, refresh])
+  const endGame = useCallback(
+    async (standings?: string[]) => {
+      if (!gameId) return
+      await commanderGameService.end(gameId, { standings })
+      await refresh()
+    },
+    [gameId, refresh],
+  )
 
   return { game, loading, error, refresh, sendDamageRequest, sendGlobalDamageRequest, resolveDamageRequest, endGame }
 }

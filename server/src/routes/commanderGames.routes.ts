@@ -3,6 +3,7 @@ import { commanderGameService } from '../services/commanderGame.service.js'
 import { commanderDamageRequestService } from '../services/commanderDamageRequest.service.js'
 import {
   createCommanderGameInputSchema,
+  endCommanderGameInputSchema,
   createCommanderDamageRequestInputSchema,
   createCommanderGlobalDamageRequestInputSchema,
   resolveCommanderDamageRequestInputSchema,
@@ -29,7 +30,8 @@ export async function commanderGameRoutes(app: FastifyInstance) {
 
   app.post('/commander-games/:id/end', async (request) => {
     const { id } = request.params as { id: string }
-    return commanderGameService.end(id)
+    const input = parseBody(endCommanderGameInputSchema, request.body ?? {})
+    return commanderGameService.end(id, input)
   })
 
   app.post('/commander-games/:id/damage-requests', async (request, reply) => {
