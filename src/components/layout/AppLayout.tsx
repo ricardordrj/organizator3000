@@ -16,6 +16,7 @@ import { useTaskDeadlineNotifications } from '@/hooks'
 import { useAppContext } from '@/context'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { AmbientGlow } from './AmbientGlow'
+import { UserMenu } from './UserMenu'
 
 interface NavItem {
   to: string
@@ -167,7 +168,10 @@ export function AppLayout() {
           <h1 className="font-heading bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-lg font-bold tracking-widest text-transparent uppercase">
             Organizador Pessoal
           </h1>
-          <DesktopNav items={visibleNavItems} />
+          <div className="flex items-center gap-2">
+            <DesktopNav items={visibleNavItems} />
+            <UserMenu />
+          </div>
         </div>
       </header>
       <main className="relative z-10 flex-1 pb-20 md:pb-0">
