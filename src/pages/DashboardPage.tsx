@@ -1,8 +1,18 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AlertTriangleIcon, BanIcon, CalendarClockIcon, ClockIcon, ListTodoIcon, LayoutDashboardIcon } from 'lucide-react'
+import {
+  AlertTriangleIcon,
+  BanIcon,
+  CalendarClockIcon,
+  CheckCircle2Icon,
+  ClockIcon,
+  ListTodoIcon,
+  LayoutDashboardIcon,
+  CpuIcon,
+  SkullIcon,
+} from 'lucide-react'
 import { toast } from 'sonner'
-import { useTasks } from '@/hooks'
+import { useTasks, useUpgradeItems, useLoreEntries, useLoreCategories } from '@/hooks'
 import type { Task } from '@/models'
 import { ApiError } from '@/services/apiClient'
 import { formatDate, formatTimeRemaining } from '@/utils/date.utils'
@@ -11,13 +21,22 @@ import { Button } from '@/components/ui/button'
 import { RescheduleDeadlineDialog } from '@/components/tasks/RescheduleDeadlineDialog'
 
 const UPCOMING_LIMIT = 4
+const RECENTLY_DONE_WINDOW_MS = 7 * 24 * 60 * 60 * 1000
+
+function activeBlockReason(task: Task): string | undefined {
+  if (task.kind !== 'full') return undefined
+  return task.blockHistory.find((record) => !record.unblockedAt)?.reason
+}
 
 export function DashboardPage() {
-  const { tasks, editTask } = useTasks()
+  const { tasks, editTask, unblockTask } = useTasks()
+  const { upgradeItems } = useUpgradeItems()
+  const { loreEntries } = useLoreEntries()
+  const { loreCategories } = useLoreCategories()
   const [rescheduleTask, setRescheduleTask] = useState<Task | null>(null)
 
   const pendingCount = tasks.filter(({ task }) => task.status !== 'done').length
-  const blockedCount = tasks.filter(({ task }) => task.isBlocked).length
+  const blockedTasks = tasks.filter(({ task }) => task.isBlocked)
   const overdueTasks = tasks.filter(({ urgency }) => urgency.level === 'overdue')
   const warningTasks = tasks.filter(({ urgency }) => urgency.level === 'warning')
   const upcomingTasks = useMemo(
@@ -27,12 +46,21 @@ export function DashboardPage() {
         .slice(0, UPCOMING_LIMIT),
     [tasks],
   )
+  const recentlyDoneCount = useMemo(() => {
+    const now = Date.now()
+    return tasks.filter(
+      ({ task }) => task.status === 'done' && now - task.updatedAt.getTime() <= RECENTLY_DONE_WINDOW_MS,
+    ).length
+  }, [tasks])
+
+  const upgradeDoneCount = upgradeItems.filter((item) => item.isDone).length
 
   const stats = [
     { label: 'Tarefas', value: tasks.length, icon: ListTodoIcon },
     { label: 'Pendentes', value: pendingCount, icon: ClockIcon },
     { label: 'Atrasadas', value: overdueTasks.length, icon: AlertTriangleIcon },
-    { label: 'Bloqueadas', value: blockedCount, icon: BanIcon },
+    { label: 'Bloqueadas', value: blockedTasks.length, icon: BanIcon },
+    { label: 'Concluídas (7d)', value: recentlyDoneCount, icon: CheckCircle2Icon },
   ]
 
   async function handleReschedule(newDeadline: Date, justification: string) {
@@ -43,6 +71,14 @@ export function DashboardPage() {
       toast.error(err instanceof ApiError ? err.message : 'Erro ao adiar o prazo')
     } finally {
       setRescheduleTask(null)
+    }
+  }
+
+  async function handleUnblock(taskId: string) {
+    try {
+      await unblockTask(taskId)
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Erro ao desbloquear a tarefa')
     }
   }
 
@@ -105,6 +141,32 @@ export function DashboardPage() {
         </Card>
       )}
 
+      {blockedTasks.length > 0 && (
+        <Card className="border-slate-500/40 bg-slate-500/10">
+          <CardContent className="space-y-2">
+            <div className="flex items-center gap-2 font-medium text-slate-600 dark:text-slate-300">
+              <BanIcon className="size-4" />
+              {blockedTasks.length} tarefa(s) bloqueada(s)
+            </div>
+            <ul className="space-y-1.5">
+              {blockedTasks.map(({ task }) => (
+                <li key={task.id} className="flex items-center justify-between gap-2 text-sm">
+                  <span>
+                    {task.title}
+                    {activeBlockReason(task) && (
+                      <span className="text-muted-foreground"> — {activeBlockReason(task)}</span>
+                    )}
+                  </span>
+                  <Button variant="outline" size="sm" onClick={() => handleUnblock(task.id)}>
+                    Desbloquear
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+
       {upcomingTasks.length > 0 && (
         <Card>
           <CardContent className="space-y-2">
@@ -134,7 +196,7 @@ export function DashboardPage() {
         </Card>
       )}
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
         {stats.map((stat) => (
           <Card key={stat.label}>
             <CardHeader>
@@ -146,6 +208,35 @@ export function DashboardPage() {
             <CardContent className="text-sm text-muted-foreground">{stat.label}</CardContent>
           </Card>
         ))}
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Link to="/upgrade-pc">
+          <Card className="transition-colors hover:bg-muted/50">
+            <CardContent className="flex items-center justify-between gap-2">
+              <div>
+                <p className="font-medium">Upgrade de PC</p>
+                <p className="text-sm text-muted-foreground">
+                  {upgradeDoneCount} de {upgradeItems.length} itens comprados
+                </p>
+              </div>
+              <CpuIcon className="size-6 text-primary" />
+            </CardContent>
+          </Card>
+        </Link>
+        <Link to="/dark-fantasy">
+          <Card className="transition-colors hover:bg-muted/50">
+            <CardContent className="flex items-center justify-between gap-2">
+              <div>
+                <p className="font-medium">Dark Fantasy</p>
+                <p className="text-sm text-muted-foreground">
+                  {loreEntries.length} página(s) em {loreCategories.length} categoria(s)
+                </p>
+              </div>
+              <SkullIcon className="size-6 text-primary" />
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
       <RescheduleDeadlineDialog
