@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Env files (config de acesso do Cloudflare, etc.) — nunca commitar
+.env
+.env.*
+!.env.example
+
 # Backend (server workspace)
 server/dist
 server/data

@@ -137,21 +137,20 @@ git push origin main
 
 Acompanha em **Actions**, no GitHub — se rodar verde, o site já deve refletir a mudança em `https://ricardordrj.com`.
 
-## 8. Proteger o acesso (Cloudflare Access)
+## 8. Proteger o acesso (Cloudflare Access + papéis no app)
 
-Autenticação sem escrever código — tudo configurado no painel da Cloudflare (Zero Trust), na frente do domínio. Ninguém chega no servidor sem antes passar por aqui.
+Dois níveis trabalhando juntos:
+
+- **Cloudflare Access** faz o *login* (Google) na frente do domínio inteiro. Ninguém chega no servidor sem passar por aqui.
+- **O app** faz a *autorização*: olha o e-mail de quem entrou e decide o que a pessoa vê. Quem está em `ADMIN_EMAILS` vê o app todo; **qualquer outro e-mail autenticado fica preso só na tela do Mesão** (as demais páginas somem e as APIs fora do mesão respondem `403`).
+
+Consequência prática: a lista de quem entra no mesão vive **só no Cloudflare** — é a lista de e-mails da política de acesso. Adicionar mais uma pessoa ao mesão = colar o e-mail dela lá, sem mexer no código e sem deploy.
 
 ### 8.1 Ativar o Zero Trust
 
-Na primeira vez, a Cloudflare pede pra escolher um **team name** (vira `SEUTIME.cloudflareaccess.com` — é só um identificador interno deles, não afeta seu domínio real). Escolhe qualquer nome disponível.
+Na primeira vez, a Cloudflare pede pra escolher um **team name** (vira `SEUTIME.cloudflareaccess.com` — é só um identificador interno deles, não afeta seu domínio real). Escolhe qualquer nome disponível. Guarda esse valor — ele vira o `CF_ACCESS_TEAM_DOMAIN` no passo 8.5.
 
-### 8.2 Método de login 1 — One-Time PIN (fallback, zero configuração)
-
-Zero Trust → **Settings → Authentication** (ou "Identity providers", dependendo da versão do painel) → **Add new** → **One-time PIN** → Save.
-
-Esse método já funciona pra qualquer e-mail que você colocar na política de acesso (passo 8.4) — sem cadastro externo nenhum. É o que seu amigo vai usar, se um dia você liberar acesso pra ele.
-
-### 8.3 Método de login 2 — Google (seu uso do dia a dia)
+### 8.2 Login com Google (único método)
 
 Precisa criar um client OAuth no Google Cloud Console primeiro:
 
@@ -165,28 +164,55 @@ Precisa criar um client OAuth no Google Cloud Console primeiro:
    (troca `SEUTIME` pelo team name do passo 8.1)
 5. Copia o **Client ID** e o **Client Secret** gerados
 
-Volta pro Cloudflare: Zero Trust → **Identity providers** → **Add new** → **Google** → cola o Client ID e Client Secret → **Save**. Testa a conexão com o botão **Test** ao lado do provider.
+Volta pro Cloudflare: Zero Trust → **Settings → Authentication → Login methods** (ou "Identity providers", dependendo da versão) → **Add new** → **Google** → cola o Client ID e Client Secret → **Save**. Testa com o botão **Test** ao lado do provider.
 
-### 8.4 Criar a Access Application
+> Login só com Google, como combinado — a pessoa entra num clique, sem código por e-mail. Se um dia quiser um fallback pra quem não tem Google, dá pra adicionar **One-Time PIN** aqui do mesmo jeito.
+
+### 8.3 Criar a Access Application
 
 Zero Trust → **Access → Applications → Add an application → Self-hosted**:
 
-1. **Application domain**: `ricardordrj.com`
-2. Em **Identity providers**, marca **One-Time PIN** e **Google** (os dois que configuramos)
-3. **Session duration**: pode deixar algo confortável tipo 24h ou 1 semana, já que é uso pessoal
+1. **Application domain**: `ricardordrj.com` (o domínio inteiro — **um app só**, não crie apps por rota; o app é uma SPA e separar por caminho não isola de verdade)
+2. Em **Identity providers**, deixa marcado só o **Google**
+3. **Session duration**: algo confortável tipo 24h ou 1 semana, já que é uso pessoal
 4. Cria a **Access Policy**:
-   - Nome: `Só eu`
+   - Nome: `Acesso liberado`
    - Action: **Allow**
-   - Include: **Emails** → seu e-mail (`ricardordrj@gmail.com` ou o que você usa no Google)
+   - Include: **Emails** → seu e-mail (`ricardordrj@gmail.com`) **e** os e-mails do pessoal do mesão (ex: `francinibrentegani@gmail.com`)
 5. Salva
 
-### 8.5 Testar
+Depois de salvar, abre a aba **Overview** do app e copia o **Application Audience (AUD) Tag** — é o `CF_ACCESS_AUD` do passo 8.5.
 
-Abre uma aba anônima e acessa `https://ricardordrj.com` — deve aparecer a tela de login da Cloudflare (com as opções Google e One-Time PIN) **antes** de qualquer coisa do seu app. Só entra quem estiver na política.
+### 8.4 Quem é admin vs. quem é do mesão
 
-### 8.6 Liberar um amigo depois (fallback)
+- **Admin** = e-mails listados em `ADMIN_EMAILS` no servidor (passo 8.5). Por padrão já é `ricardordrj@gmail.com`. Vê o app inteiro.
+- **Mesão** = *qualquer outro* e-mail que esteja na política do Access mas **não** em `ADMIN_EMAILS`. Cai direto no `/mesao` e não sai de lá.
 
-Edita a Access Policy do passo 8.4 → adiciona o e-mail da pessoa na lista de **Emails** incluídos → salva. Na próxima vez que essa pessoa acessar o site, ela recebe um código por e-mail (One-Time PIN) e entra — sem precisar configurar nada do lado dela. Pra revogar, é só tirar o e-mail da lista.
+Ou seja: pra liberar mais gente pro mesão (os "5 e depois mais"), você **só adiciona o e-mail na Access Policy do passo 8.3** — o app automaticamente trata como mesão. Pra revogar, tira o e-mail da política.
+
+### 8.5 Ligar a verificação no servidor
+
+O app confere a identidade pelo **JWT assinado** da Cloudflare (imune a falsificação mesmo que alguém alcance a VPS por fora do Cloudflare). Pra isso, no servidor, cria o arquivo `~/organizator3000/.env` (o `organizator3000.service` já lê ele automaticamente):
+
+```bash
+cat > ~/organizator3000/.env <<'EOF'
+ADMIN_EMAILS=ricardordrj@gmail.com
+CF_ACCESS_TEAM_DOMAIN=SEUTIME.cloudflareaccess.com
+CF_ACCESS_AUD=COLE_AQUI_O_AUD_TAG
+EOF
+systemctl --user restart organizator3000
+```
+
+- `ADMIN_EMAILS`: separados por vírgula, se um dia tiver mais de um admin.
+- `CF_ACCESS_TEAM_DOMAIN`: o do passo 8.1 (sem `https://`).
+- `CF_ACCESS_AUD`: o AUD Tag do passo 8.3.
+
+> Se deixar `CF_ACCESS_TEAM_DOMAIN`/`CF_ACCESS_AUD` em branco, o app cai pra confiar no header `Cf-Access-Authenticated-User-Email` que a Cloudflare injeta — funciona, mas aí é importante travar o firewall/Caddy só nos IPs da Cloudflare (ver Notas de segurança), senão dá pra forjar o header batendo direto na VPS. Com o JWT configurado, não precisa se preocupar com isso.
+
+### 8.6 Testar
+
+1. Aba anônima em `https://ricardordrj.com` com **seu** e-mail → login Google → você vê o app inteiro.
+2. Aba anônima com o e-mail de alguém do mesão → login Google → cai direto no Mesão, sem menu das outras telas. Digitar `https://ricardordrj.com/financas` na mão redireciona de volta pro mesão, e a API responde `403`.
 
 ## Notas de segurança
 

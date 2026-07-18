@@ -8,6 +8,9 @@ WorkingDirectory=%h/organizator3000/server
 ExecStart=/usr/bin/node dist/index.js
 Environment=NODE_ENV=production
 Environment=PORT=4000
+# Config extra de controle de acesso (Cloudflare Access) fica aqui, fora do git.
+# O "-" faz o serviço subir normalmente mesmo se o arquivo não existir.
+EnvironmentFile=-%h/organizator3000/.env
 Restart=on-failure
 RestartSec=5
 

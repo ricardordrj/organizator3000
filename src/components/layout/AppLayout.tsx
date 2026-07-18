@@ -13,8 +13,10 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useTaskDeadlineNotifications } from '@/hooks'
+import { useAppContext } from '@/context'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { AmbientGlow } from './AmbientGlow'
+import { UserMenu } from './UserMenu'
 
 interface NavItem {
   to: string
@@ -35,15 +37,12 @@ const navItems: NavItem[] = [
 ]
 
 // Barra inferior no mobile só cabe ~4-5 itens sem precisar rolar; o resto vai pro popover "Mais".
-const primaryMobileItems = navItems.filter((item) =>
-  ['/', '/tasks', '/financas', '/compras'].includes(item.to),
-)
-const overflowMobileItems = navItems.filter((item) => !primaryMobileItems.includes(item))
+const primaryMobilePaths = ['/', '/tasks', '/financas', '/compras']
 
-function DesktopNav() {
+function DesktopNav({ items }: { items: NavItem[] }) {
   return (
     <nav className="hidden flex-wrap gap-1 md:flex">
-      {navItems.map((item) => (
+      {items.map((item) => (
         <NavLink
           key={item.to}
           to={item.to}
@@ -89,8 +88,16 @@ function TabBarLink({ item }: { item: NavItem }) {
   )
 }
 
-function MobileTabBar() {
+function MobileTabBar({ items }: { items: NavItem[] }) {
   const location = useLocation()
+  // Com poucos itens (ex: só o mesão) tudo cabe direto na barra, sem "Mais".
+  const usesOverflow = items.length > 5
+  const primaryMobileItems = usesOverflow
+    ? items.filter((item) => primaryMobilePaths.includes(item.to))
+    : items
+  const overflowMobileItems = usesOverflow
+    ? items.filter((item) => !primaryMobileItems.includes(item))
+    : []
   const isOverflowActive = overflowMobileItems.some(
     (item) => location.pathname === item.to || (item.to !== '/' && location.pathname.startsWith(item.to)),
   )
@@ -104,40 +111,42 @@ function MobileTabBar() {
         {primaryMobileItems.map((item) => (
           <TabBarLink key={item.to} item={item} />
         ))}
-        <Popover>
-          <PopoverTrigger
-            render={
-              <button
-                type="button"
-                className={cn(
-                  'flex flex-1 flex-col items-center gap-0.5 py-2 text-[0.625rem] font-medium tracking-wide uppercase transition-colors',
-                  isOverflowActive ? 'text-primary' : 'text-muted-foreground active:text-foreground',
-                )}
-              />
-            }
-          >
-            <MoreHorizontalIcon className="size-5 shrink-0" />
-            <span>Mais</span>
-          </PopoverTrigger>
-          <PopoverContent align="end" side="top" className="w-56 p-1.5">
-            {overflowMobileItems.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                className={({ isActive }) =>
-                  cn(
-                    'flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors',
-                    isActive ? 'bg-muted text-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-                  )
-                }
-              >
-                <item.icon className="size-4 shrink-0" />
-                {item.label}
-              </NavLink>
-            ))}
-          </PopoverContent>
-        </Popover>
+        {overflowMobileItems.length > 0 && (
+          <Popover>
+            <PopoverTrigger
+              render={
+                <button
+                  type="button"
+                  className={cn(
+                    'flex flex-1 flex-col items-center gap-0.5 py-2 text-[0.625rem] font-medium tracking-wide uppercase transition-colors',
+                    isOverflowActive ? 'text-primary' : 'text-muted-foreground active:text-foreground',
+                  )}
+                />
+              }
+            >
+              <MoreHorizontalIcon className="size-5 shrink-0" />
+              <span>Mais</span>
+            </PopoverTrigger>
+            <PopoverContent align="end" side="top" className="w-56 p-1.5">
+              {overflowMobileItems.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.end}
+                  className={({ isActive }) =>
+                    cn(
+                      'flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors',
+                      isActive ? 'bg-muted text-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                    )
+                  }
+                >
+                  <item.icon className="size-4 shrink-0" />
+                  {item.label}
+                </NavLink>
+              ))}
+            </PopoverContent>
+          </Popover>
+        )}
       </div>
     </nav>
   )
@@ -145,6 +154,11 @@ function MobileTabBar() {
 
 export function AppLayout() {
   useTaskDeadlineNotifications()
+  const { user } = useAppContext()
+
+  // Usuários do mesão só enxergam a navegação do mesão.
+  const visibleNavItems =
+    user?.role === 'mesao' ? navItems.filter((item) => item.to === '/mesao') : navItems
 
   return (
     <div className="flex min-h-svh flex-col">
@@ -154,7 +168,10 @@ export function AppLayout() {
           <h1 className="font-heading bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-lg font-bold tracking-widest text-transparent uppercase">
             Organizador Pessoal
           </h1>
-          <DesktopNav />
+          <div className="flex items-center gap-2">
+            <DesktopNav items={visibleNavItems} />
+            <UserMenu />
+          </div>
         </div>
       </header>
       <main className="relative z-10 flex-1 pb-20 md:pb-0">
@@ -162,7 +179,7 @@ export function AppLayout() {
           <Outlet />
         </div>
       </main>
-      <MobileTabBar />
+      <MobileTabBar items={visibleNavItems} />
     </div>
   )
 }
