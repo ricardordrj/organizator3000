@@ -4,6 +4,7 @@ import { commanderDamageRequestService } from '../services/commanderDamageReques
 import {
   createCommanderGameInputSchema,
   createCommanderDamageRequestInputSchema,
+  createCommanderGlobalDamageRequestInputSchema,
   resolveCommanderDamageRequestInputSchema,
 } from '../schemas.js'
 import { parseBody } from '../lib/validate.js'
@@ -35,6 +36,14 @@ export async function commanderGameRoutes(app: FastifyInstance) {
     const { id: gameId } = request.params as { id: string }
     const input = parseBody(createCommanderDamageRequestInputSchema, request.body)
     const created = await commanderDamageRequestService.create(gameId, input)
+    reply.code(201)
+    return created
+  })
+
+  app.post('/commander-games/:id/damage-requests/broadcast', async (request, reply) => {
+    const { id: gameId } = request.params as { id: string }
+    const input = parseBody(createCommanderGlobalDamageRequestInputSchema, request.body)
+    const created = await commanderDamageRequestService.createGlobal(gameId, input)
     reply.code(201)
     return created
   })

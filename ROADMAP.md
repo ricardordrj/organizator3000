@@ -21,6 +21,7 @@ Lista de melhorias planejadas para o organizador pessoal. Conforme forem sendo u
   - [x] Visual com ícones (espada pra combate, coroa pra comandante) e feedback ao vivo (número da vida pisca ao mudar)
   - [x] Sincronização entre celulares por polling (a cada ~1.5s), simples o bastante pro volume de uso — sem necessidade de websocket
   - [x] Já em produção (`ricardordrj.com/mesao`), deploy automático de sempre
+  - [x] **Dano global**: botão "Dano global" causa o mesmo valor a todos os outros jogadores sentados na mesa de uma vez (efeitos de carta tipo "causa X de dano a todos os jogadores"), criando uma solicitação pendente por vítima — cada um confirma na própria tela, sem mudar a regra de "só quem apanhou decide"
   - [ ] **Acesso: solução provisória pra jogar hoje** — o Cloudflare Access do domínio inteiro já existe e só libera o e-mail do Ricardo, então dar acesso aos amigos ali liberaria o site inteiro (Finanças incluso). Solução: criar uma **segunda Application no Cloudflare Access, com path `ricardordrj.com/mesao*` + `ricardordrj.com/api/commander-*`**, política própria só com os e-mails de Marchesi/Gabigol/Serjão/Daniel (login por One-Time PIN). Cloudflare usa a regra mais específica por caminho, então o resto do site continua protegido só pro Ricardo. Por isso o carregamento de jogadores do mesão foi separado do `hydrate()` geral do app (`useAppStore.ts`) — sem isso, a tela ficaria vazia pra quem só tem acesso a `/mesao`, já que a carga geral falha inteira se qualquer endpoint fora do commander for bloqueado.
   - [ ] **Decisão definitiva de acesso**: depois de testar hoje, decidir entre manter esse esquema de duas Applications, ou trocar por outro modelo (link de convite por pessoa, etc.) — ver histórico da conversa sobre os prós/contras de cada um.
 - [ ] **Utilitários de dev**
@@ -43,7 +44,6 @@ Lista de melhorias planejadas para o organizador pessoal. Conforme forem sendo u
 - Exportar/importar tarefas em JSON (backup manual)
 - Arquivar tarefas concluídas antigas
 - **Mesão de Commander — controlador de turnos**: ao iniciar a mesão (junto com seleção dos participantes e vida inicial), definir também quem começa e a sequência/ordem de jogada, além do tempo definido por turno. Tela indica de quem é a vez; quando o tempo do jogador da vez acaba, dispara um alarme sonoro/visual avisando, e ele ganha mais X segundos (configurável) pra finalizar a jogada antes de passar a vez adiante.
-- **Mesão de Commander — dano global**: permitir que um jogador cause dano a todos os outros participantes de uma vez (efeitos de carta tipo "causa X de dano a todos os jogadores"), em vez de precisar enviar o dano um por um.
 
 ## Feito
 

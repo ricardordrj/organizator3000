@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { SwordsIcon, FlagIcon } from 'lucide-react'
+import { SwordsIcon, FlagIcon, RadiationIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { useCommanderGame, useCommanderPlayers, useMyCommanderPlayerId } from '@/hooks'
 import { commanderGameService } from '@/services'
@@ -12,6 +12,7 @@ import { StartGameDialog } from '@/components/commander/StartGameDialog'
 import { MyIdentityPicker } from '@/components/commander/MyIdentityPicker'
 import { PlayerCard } from '@/components/commander/PlayerCard'
 import { SendDamageDialog } from '@/components/commander/SendDamageDialog'
+import { SendGlobalDamageDialog } from '@/components/commander/SendGlobalDamageDialog'
 import { PlayerDetailDialog } from '@/components/commander/PlayerDetailDialog'
 
 const ACTIVE_GAME_KEY = 'commander:active-game-id'
@@ -22,10 +23,12 @@ export function CommanderPage() {
   const [startDialogOpen, setStartDialogOpen] = useState(false)
   const [endConfirmOpen, setEndConfirmOpen] = useState(false)
   const [damageTarget, setDamageTarget] = useState<CommanderGamePlayer | null>(null)
+  const [globalDamageOpen, setGlobalDamageOpen] = useState(false)
   const [detailPlayer, setDetailPlayer] = useState<CommanderGamePlayer | null>(null)
 
   const { myPlayerId } = useMyCommanderPlayerId()
-  const { game, sendDamageRequest, resolveDamageRequest, endGame } = useCommanderGame(activeGameId)
+  const { game, sendDamageRequest, sendGlobalDamageRequest, resolveDamageRequest, endGame } =
+    useCommanderGame(activeGameId)
   const { commanderPlayersLoaded, loadCommanderPlayers } = useCommanderPlayers()
 
   // Carrega os jogadores fixos sozinho, sem depender do hydrate geral do app —
@@ -137,10 +140,18 @@ export function CommanderPage() {
             </p>
           )}
 
-          <Button variant="outline" size="sm" onClick={() => setEndConfirmOpen(true)}>
-            <FlagIcon className="size-4" />
-            Encerrar mesão
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            {myPlayerId && game.players.length > 1 && (
+              <Button variant="outline" size="sm" onClick={() => setGlobalDamageOpen(true)}>
+                <RadiationIcon className="size-4" />
+                Dano global
+              </Button>
+            )}
+            <Button variant="outline" size="sm" onClick={() => setEndConfirmOpen(true)}>
+              <FlagIcon className="size-4" />
+              Encerrar mesão
+            </Button>
+          </div>
         </div>
       )}
 
@@ -152,6 +163,18 @@ export function CommanderPage() {
           toPlayerName={damageTarget.name}
           onSend={async (input) => {
             await sendDamageRequest({ fromPlayerId: myPlayer.playerId, toPlayerId: damageTarget.playerId, ...input })
+          }}
+        />
+      )}
+
+      {game && myPlayer && (
+        <SendGlobalDamageDialog
+          open={globalDamageOpen}
+          onOpenChange={setGlobalDamageOpen}
+          fromPlayerName={myPlayer.name}
+          otherPlayersCount={game.players.length - 1}
+          onSend={async (input) => {
+            await sendGlobalDamageRequest({ fromPlayerId: myPlayer.playerId, ...input })
           }}
         />
       )}

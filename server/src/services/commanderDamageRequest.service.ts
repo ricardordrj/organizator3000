@@ -3,7 +3,11 @@ import { and, eq } from 'drizzle-orm'
 import { db } from '../db/client.js'
 import { commanderGames, commanderGamePlayers, commanderDamageRequests, commanderPlayers } from '../db/schema.js'
 import { notFound, badRequest, conflict } from '../lib/errors.js'
-import type { CreateCommanderDamageRequestInput, ResolveCommanderDamageRequestInput } from '../schemas.js'
+import type {
+  CreateCommanderDamageRequestInput,
+  CreateCommanderGlobalDamageRequestInput,
+  ResolveCommanderDamageRequestInput,
+} from '../schemas.js'
 
 async function loadGamePlayer(gameId: string, playerId: string) {
   const [row] = await db
@@ -77,6 +81,36 @@ export const commanderDamageRequestService = {
     }
 
     return toPublic(id)
+  },
+
+  /** Um jogador causa o mesmo dano a todos os outros sentados na mesa de uma vez (efeito de carta tipo "X a todos"). */
+  async createGlobal(gameId: string, input: CreateCommanderGlobalDamageRequestInput) {
+    const [game] = await db.select().from(commanderGames).where(eq(commanderGames.id, gameId))
+    if (!game) throw notFound('Mesão não encontrado')
+    if (game.status !== 'active') throw conflict('Esse mesão já foi encerrado')
+
+    const fromSeated = await loadGamePlayer(gameId, input.fromPlayerId)
+    if (!fromSeated) throw badRequest('Jogador não está sentado nesse mesão')
+
+    const seated = await db.select().from(commanderGamePlayers).where(eq(commanderGamePlayers.gameId, gameId))
+    const targets = seated.filter((p) => p.playerId !== input.fromPlayerId)
+    if (targets.length === 0) throw badRequest('Não há outros jogadores nessa mesa')
+
+    const now = new Date()
+    const rows = targets.map((target) => ({
+      id: randomUUID(),
+      gameId,
+      fromPlayerId: input.fromPlayerId,
+      toPlayerId: target.playerId,
+      amount: input.amount,
+      type: input.type,
+      commanderName: input.commanderName,
+      status: 'pending' as const,
+      createdAt: now,
+    }))
+    await db.insert(commanderDamageRequests).values(rows)
+
+    return Promise.all(rows.map((row) => toPublic(row.id)))
   },
 
   async resolve(gameId: string, requestId: string, input: ResolveCommanderDamageRequestInput) {

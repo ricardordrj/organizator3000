@@ -5,6 +5,7 @@ import type {
   CommanderDamageRequest,
   CreateCommanderGameInput,
   CreateCommanderDamageRequestInput,
+  CreateCommanderGlobalDamageRequestInput,
   ResolveCommanderDamageRequestInput,
 } from '@/models'
 import { apiClient } from './apiClient'
@@ -34,6 +35,14 @@ export const commanderGameService = {
   async createDamageRequest(gameId: string, input: CreateCommanderDamageRequestInput): Promise<CommanderDamageRequest> {
     const raw = await apiClient.post<unknown>(`/commander-games/${gameId}/damage-requests`, input)
     return commanderDamageRequestSchema.parse(raw)
+  },
+
+  async createGlobalDamageRequest(
+    gameId: string,
+    input: CreateCommanderGlobalDamageRequestInput,
+  ): Promise<CommanderDamageRequest[]> {
+    const raw = await apiClient.post<unknown[]>(`/commander-games/${gameId}/damage-requests/broadcast`, input)
+    return raw.map((r) => commanderDamageRequestSchema.parse(r))
   },
 
   async resolveDamageRequest(

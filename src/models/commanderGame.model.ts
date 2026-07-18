@@ -85,6 +85,14 @@ export const createCommanderDamageRequestInputSchema = z.object({
 })
 export type CreateCommanderDamageRequestInput = z.infer<typeof createCommanderDamageRequestInputSchema>
 
+export const createCommanderGlobalDamageRequestInputSchema = z.object({
+  fromPlayerId: z.string().min(1),
+  amount: z.number().int().refine((v) => v !== 0, 'Valor não pode ser zero'),
+  type: commanderDamageTypeSchema,
+  commanderName: z.string().min(1).optional(),
+})
+export type CreateCommanderGlobalDamageRequestInput = z.infer<typeof createCommanderGlobalDamageRequestInputSchema>
+
 export const resolveCommanderDamageRequestInputSchema = z.object({
   action: z.enum(['apply', 'dismiss']),
   amount: z.number().int().refine((v) => v !== 0).optional(),

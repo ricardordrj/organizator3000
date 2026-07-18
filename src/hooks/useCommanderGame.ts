@@ -3,6 +3,7 @@ import { commanderGameService } from '@/services'
 import type {
   CommanderGameDetail,
   CreateCommanderDamageRequestInput,
+  CreateCommanderGlobalDamageRequestInput,
   ResolveCommanderDamageRequestInput,
 } from '@/models'
 
@@ -48,6 +49,15 @@ export function useCommanderGame(gameId: string | null) {
     [gameId, refresh],
   )
 
+  const sendGlobalDamageRequest = useCallback(
+    async (input: CreateCommanderGlobalDamageRequestInput) => {
+      if (!gameId) return
+      await commanderGameService.createGlobalDamageRequest(gameId, input)
+      await refresh()
+    },
+    [gameId, refresh],
+  )
+
   const resolveDamageRequest = useCallback(
     async (requestId: string, input: ResolveCommanderDamageRequestInput) => {
       if (!gameId) return
@@ -63,5 +73,5 @@ export function useCommanderGame(gameId: string | null) {
     await refresh()
   }, [gameId, refresh])
 
-  return { game, loading, error, refresh, sendDamageRequest, resolveDamageRequest, endGame }
+  return { game, loading, error, refresh, sendDamageRequest, sendGlobalDamageRequest, resolveDamageRequest, endGame }
 }

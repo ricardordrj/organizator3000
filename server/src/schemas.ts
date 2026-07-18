@@ -302,3 +302,11 @@ export const resolveCommanderDamageRequestInputSchema = z.object({
   amount: z.coerce.number().int().refine((v) => v !== 0, 'Valor não pode ser zero').optional(),
 })
 export type ResolveCommanderDamageRequestInput = z.infer<typeof resolveCommanderDamageRequestInputSchema>
+
+export const createCommanderGlobalDamageRequestInputSchema = z.object({
+  fromPlayerId: z.string().min(1, 'Jogador de origem é obrigatório'),
+  amount: z.coerce.number().int().refine((v) => v !== 0, 'Valor não pode ser zero'),
+  type: commanderDamageTypeSchema,
+  commanderName: z.string().min(1).optional(),
+})
+export type CreateCommanderGlobalDamageRequestInput = z.infer<typeof createCommanderGlobalDamageRequestInputSchema>
