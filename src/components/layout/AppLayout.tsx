@@ -6,6 +6,7 @@ import {
   WalletIcon,
   CpuIcon,
   SkullIcon,
+  ShoppingCartIcon,
   SettingsIcon,
   MoreHorizontalIcon,
   type LucideIcon,
@@ -26,6 +27,7 @@ const navItems: NavItem[] = [
   { to: '/', label: 'Dashboard', end: true, icon: LayoutDashboardIcon },
   { to: '/tasks', label: 'Tarefas', end: false, icon: ListTodoIcon },
   { to: '/financas', label: 'Finanças', end: false, icon: WalletIcon },
+  { to: '/compras', label: 'Compras', end: false, icon: ShoppingCartIcon },
   { to: '/upgrade-pc', label: 'Upgrade PC', end: false, icon: CpuIcon },
   { to: '/dark-fantasy', label: 'Dark Fantasy', end: false, icon: SkullIcon },
   { to: '/settings', label: 'Configurações', end: false, icon: SettingsIcon },
@@ -34,7 +36,7 @@ const navItems: NavItem[] = [
 
 // Barra inferior no mobile só cabe ~4-5 itens sem precisar rolar; o resto vai pro popover "Mais".
 const primaryMobileItems = navItems.filter((item) =>
-  ['/', '/tasks', '/financas', '/dark-fantasy'].includes(item.to),
+  ['/', '/tasks', '/financas', '/compras'].includes(item.to),
 )
 const overflowMobileItems = navItems.filter((item) => !primaryMobileItems.includes(item))
 

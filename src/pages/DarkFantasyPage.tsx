@@ -2,13 +2,14 @@ import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import {
   SkullIcon,
+  FolderKanbanIcon,
   PlusIcon,
   ChevronDownIcon,
   ExternalLinkIcon,
   ImageIcon,
 } from 'lucide-react'
 import { useLoreCategories, useLoreEntries } from '@/hooks'
-import type { LoreCategory, LoreEntry } from '@/models'
+import type { LoreCategory, LoreCategoryKind, LoreEntry } from '@/models'
 import { ApiError } from '@/services/apiClient'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
@@ -20,17 +21,33 @@ import { CategoryFormDialog } from '@/components/lore/CategoryFormDialog'
 import { EntryFormDialog } from '@/components/lore/EntryFormDialog'
 import { LoreContent } from '@/components/lore/LoreContent'
 
+const kindTabs: { kind: LoreCategoryKind; label: string; icon: typeof SkullIcon }[] = [
+  { kind: 'dark_fantasy', label: 'Dark Fantasy', icon: SkullIcon },
+  { kind: 'personal_project', label: 'Projetos Pessoais', icon: FolderKanbanIcon },
+]
+
 export function DarkFantasyPage() {
   const { loreCategories, removeLoreCategory } = useLoreCategories()
   const { loreEntries, removeLoreEntry } = useLoreEntries()
 
+  const [activeKind, setActiveKind] = useState<LoreCategoryKind>('dark_fantasy')
+  const activeTab = kindTabs.find((tab) => tab.kind === activeKind)!
+
   const sortedCategories = useMemo(
-    () => [...loreCategories].sort((a, b) => a.orderIndex - b.orderIndex),
-    [loreCategories],
+    () =>
+      loreCategories
+        .filter((category) => category.kind === activeKind)
+        .sort((a, b) => a.orderIndex - b.orderIndex),
+    [loreCategories, activeKind],
   )
 
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null)
   const activeCategoryIdOrFirst = activeCategoryId ?? sortedCategories[0]?.id ?? null
+
+  function switchKind(kind: LoreCategoryKind) {
+    setActiveKind(kind)
+    setActiveCategoryId(null)
+  }
 
   const entriesInCategory = useMemo(
     () =>
@@ -97,21 +114,42 @@ export function DarkFantasyPage() {
 
   return (
     <section className="space-y-4">
+      <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
+        {kindTabs.map((tab) => (
+          <button
+            key={tab.kind}
+            type="button"
+            onClick={() => switchKind(tab.kind)}
+            className={cn(
+              'flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium tracking-wide whitespace-nowrap transition-colors',
+              tab.kind === activeKind
+                ? 'bg-gradient-to-r from-primary/25 to-accent/25 text-foreground ring-1 ring-primary/50'
+                : 'bg-muted text-muted-foreground hover:text-foreground',
+            )}
+          >
+            <tab.icon className="size-3.5" />
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <h2 className="flex items-center gap-2 text-xl font-semibold">
-            <SkullIcon className="size-5 text-primary" />
-            Dark Fantasy
+            <activeTab.icon className="size-5 text-primary" />
+            {activeTab.label}
           </h2>
-          <a
-            href="https://github.com/ricardordrj/DarkFantasy"
-            target="_blank"
-            rel="noreferrer"
-            className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-          >
-            github.com/ricardordrj/DarkFantasy
-            <ExternalLinkIcon className="size-3" />
-          </a>
+          {activeKind === 'dark_fantasy' && (
+            <a
+              href="https://github.com/ricardordrj/DarkFantasy"
+              target="_blank"
+              rel="noreferrer"
+              className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+            >
+              github.com/ricardordrj/DarkFantasy
+              <ExternalLinkIcon className="size-3" />
+            </a>
+          )}
         </div>
         <Button
           size="sm"
@@ -238,7 +276,12 @@ export function DarkFantasyPage() {
         </>
       )}
 
-      <CategoryFormDialog category={editingCategory} open={categoryFormOpen} onOpenChange={setCategoryFormOpen} />
+      <CategoryFormDialog
+        category={editingCategory}
+        kind={activeKind}
+        open={categoryFormOpen}
+        onOpenChange={setCategoryFormOpen}
+      />
       <EntryFormDialog
         entry={editingEntry}
         categoryId={activeCategoryIdOrFirst}

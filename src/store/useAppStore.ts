@@ -13,6 +13,8 @@ import {
   upgradeItemService,
   loreCategoryService,
   loreEntryService,
+  shoppingProfileService,
+  shoppingItemService,
 } from '@/services'
 import { createUiSlice } from './slices/uiSlice'
 import { createTaskSlice } from './slices/taskSlice'
@@ -27,6 +29,8 @@ import { createUpgradePhaseSlice } from './slices/upgradePhaseSlice'
 import { createUpgradeItemSlice } from './slices/upgradeItemSlice'
 import { createLoreCategorySlice } from './slices/loreCategorySlice'
 import { createLoreEntrySlice } from './slices/loreEntrySlice'
+import { createShoppingProfileSlice } from './slices/shoppingProfileSlice'
+import { createShoppingItemSlice } from './slices/shoppingItemSlice'
 import type { AppState } from './types'
 
 export const useAppStore = create<AppState>()((set, get, api) => ({
@@ -43,6 +47,8 @@ export const useAppStore = create<AppState>()((set, get, api) => ({
   ...createUpgradeItemSlice(set, get, api),
   ...createLoreCategorySlice(set, get, api),
   ...createLoreEntrySlice(set, get, api),
+  ...createShoppingProfileSlice(set, get, api),
+  ...createShoppingItemSlice(set, get, api),
   hydrate: async () => {
     const [
       settings,
@@ -58,6 +64,8 @@ export const useAppStore = create<AppState>()((set, get, api) => ({
       upgradeItems,
       loreCategories,
       loreEntries,
+      shoppingProfiles,
+      shoppingItems,
     ] = await Promise.all([
       settingsService.get(),
       taskService.list(),
@@ -72,6 +80,8 @@ export const useAppStore = create<AppState>()((set, get, api) => ({
       upgradeItemService.list(),
       loreCategoryService.list(),
       loreEntryService.list(),
+      shoppingProfileService.list(),
+      shoppingItemService.list(),
     ])
     set({
       settings,
@@ -87,12 +97,19 @@ export const useAppStore = create<AppState>()((set, get, api) => ({
       upgradeItems,
       loreCategories,
       loreEntries,
+      shoppingProfiles,
+      shoppingItems,
       isHydrated: true,
     })
     const currentActiveId = get().activeFinanceProfileId
     const stillValid = currentActiveId && financeProfiles.some((p) => p.id === currentActiveId)
     if (!stillValid) {
       get().setActiveFinanceProfileId(financeProfiles[0]?.id ?? null)
+    }
+    const currentActiveShoppingId = get().activeShoppingProfileId
+    const stillValidShopping = currentActiveShoppingId && shoppingProfiles.some((p) => p.id === currentActiveShoppingId)
+    if (!stillValidShopping) {
+      get().setActiveShoppingProfileId(shoppingProfiles[0]?.id ?? null)
     }
   },
 }))

@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
-import type { LoreCategory } from '@/models'
+import type { LoreCategory, LoreCategoryKind } from '@/models'
 import { useLoreCategories } from '@/hooks'
 import { ApiError } from '@/services/apiClient'
 import { Button } from '@/components/ui/button'
@@ -22,11 +22,12 @@ function buildDefaultValues(category: LoreCategory | null): CategoryFormValues {
 
 interface CategoryFormDialogProps {
   category?: LoreCategory | null
+  kind: LoreCategoryKind
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-export function CategoryFormDialog({ category, open, onOpenChange }: CategoryFormDialogProps) {
+export function CategoryFormDialog({ category, kind, open, onOpenChange }: CategoryFormDialogProps) {
   const { addLoreCategory, editLoreCategory } = useLoreCategories()
   const [submitting, setSubmitting] = useState(false)
 
@@ -48,7 +49,7 @@ export function CategoryFormDialog({ category, open, onOpenChange }: CategoryFor
         await editLoreCategory(category.id, { title: values.title })
         toast.success('Categoria atualizada com sucesso')
       } else {
-        await addLoreCategory({ title: values.title })
+        await addLoreCategory({ title: values.title, kind })
         toast.success('Categoria criada com sucesso')
       }
       onOpenChange(false)

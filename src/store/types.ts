@@ -37,6 +37,12 @@ import type {
   LoreEntry,
   CreateLoreEntryInput,
   UpdateLoreEntryInput,
+  ShoppingProfile,
+  CreateShoppingProfileInput,
+  UpdateShoppingProfileInput,
+  ShoppingItem,
+  CreateShoppingItemInput,
+  UpdateShoppingItemInput,
 } from '@/models'
 
 export interface UiSlice {
@@ -44,9 +50,11 @@ export interface UiSlice {
   isHydrated: boolean
   notificationsEnabled: boolean
   activeFinanceProfileId: string | null
+  activeShoppingProfileId: string | null
   setTheme: (theme: Theme) => Promise<void>
   setNotificationsEnabled: (enabled: boolean) => Promise<void>
   setActiveFinanceProfileId: (id: string | null) => void
+  setActiveShoppingProfileId: (id: string | null) => void
 }
 
 export interface TaskSlice {
@@ -142,6 +150,21 @@ export interface LoreEntrySlice {
   removeLoreEntry: (id: string) => Promise<void>
 }
 
+export interface ShoppingProfileSlice {
+  shoppingProfiles: ShoppingProfile[]
+  addShoppingProfile: (input: CreateShoppingProfileInput) => Promise<ShoppingProfile>
+  editShoppingProfile: (id: string, patch: UpdateShoppingProfileInput) => Promise<void>
+  removeShoppingProfile: (id: string) => Promise<void>
+}
+
+export interface ShoppingItemSlice {
+  shoppingItems: ShoppingItem[]
+  addShoppingItem: (input: CreateShoppingItemInput) => Promise<ShoppingItem>
+  editShoppingItem: (id: string, patch: UpdateShoppingItemInput) => Promise<void>
+  toggleShoppingItem: (id: string) => Promise<void>
+  removeShoppingItem: (id: string) => Promise<void>
+}
+
 export interface AppState
   extends UiSlice,
     TaskSlice,
@@ -155,6 +178,8 @@ export interface AppState
     UpgradePhaseSlice,
     UpgradeItemSlice,
     LoreCategorySlice,
-    LoreEntrySlice {
+    LoreEntrySlice,
+    ShoppingProfileSlice,
+    ShoppingItemSlice {
   hydrate: () => Promise<void>
 }

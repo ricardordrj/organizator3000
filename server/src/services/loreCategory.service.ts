@@ -10,6 +10,7 @@ type LoreCategoryRow = typeof loreCategories.$inferSelect
 function rowToLoreCategory(row: LoreCategoryRow) {
   return {
     id: row.id,
+    kind: row.kind,
     title: row.title,
     orderIndex: row.orderIndex,
     createdAt: row.createdAt,
@@ -31,10 +32,15 @@ export const loreCategoryService = {
   async create(input: CreateLoreCategoryInput) {
     const now = new Date()
     const id = randomUUID()
-    const [row] = await db.select({ max: max(loreCategories.orderIndex) }).from(loreCategories)
+    const kind = input.kind ?? 'dark_fantasy'
+    const [row] = await db
+      .select({ max: max(loreCategories.orderIndex) })
+      .from(loreCategories)
+      .where(eq(loreCategories.kind, kind))
     const orderIndex = (row?.max ?? -1) + 1
     await db.insert(loreCategories).values({
       id,
+      kind,
       title: input.title,
       orderIndex,
       createdAt: now,

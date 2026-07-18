@@ -301,11 +301,14 @@ export const upgradeItems = sqliteTable(
   }),
 )
 
-// ---------- lore_categories (seções do wiki de world-building — Dark Fantasy) ----------
+// ---------- lore_categories (seções do wiki de world-building — Dark Fantasy — e projetos pessoais, mesmo schema) ----------
 export const loreCategories = sqliteTable(
   'lore_categories',
   {
     id: text('id').primaryKey(),
+    kind: text('kind', { enum: ['dark_fantasy', 'personal_project'] })
+      .notNull()
+      .default('dark_fantasy'),
     title: text('title').notNull(),
     orderIndex: integer('order_index').notNull(),
     createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
@@ -313,6 +316,7 @@ export const loreCategories = sqliteTable(
   },
   (t) => ({
     orderIdx: index('lore_categories_order_idx').on(t.orderIndex),
+    kindIdx: index('lore_categories_kind_idx').on(t.kind),
   }),
 )
 
@@ -334,6 +338,40 @@ export const loreEntries = sqliteTable(
   (t) => ({
     categoryIdx: index('lore_entries_category_idx').on(t.categoryId),
     orderIdx: index('lore_entries_order_idx').on(t.orderIndex),
+  }),
+)
+
+// ---------- shopping_profiles (perfis por modalidade de compra — Peças, Utensílios domésticos, Roupas, Produtos) ----------
+export const shoppingProfiles = sqliteTable('shopping_profiles', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
+})
+
+// ---------- shopping_items (itens a comprar dentro de um perfil, com urgência e valor) ----------
+export const shoppingItems = sqliteTable(
+  'shopping_items',
+  {
+    id: text('id').primaryKey(),
+    profileId: text('profile_id')
+      .notNull()
+      .references(() => shoppingProfiles.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    notes: text('notes'),
+    priceCents: integer('price_cents'),
+    urgency: text('urgency', { enum: ['baixa', 'media', 'alta'] })
+      .notNull()
+      .default('media'),
+    isDone: integer('is_done', { mode: 'boolean' }).notNull().default(false),
+    orderIndex: integer('order_index').notNull(),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+    updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
+  },
+  (t) => ({
+    profileIdx: index('shopping_items_profile_idx').on(t.profileId),
+    orderIdx: index('shopping_items_order_idx').on(t.orderIndex),
+    urgencyIdx: index('shopping_items_urgency_idx').on(t.urgency),
   }),
 )
 
@@ -432,4 +470,12 @@ export const loreCategoriesRelations = relations(loreCategories, ({ many }) => (
 
 export const loreEntriesRelations = relations(loreEntries, ({ one }) => ({
   category: one(loreCategories, { fields: [loreEntries.categoryId], references: [loreCategories.id] }),
+}))
+
+export const shoppingProfilesRelations = relations(shoppingProfiles, ({ many }) => ({
+  items: many(shoppingItems),
+}))
+
+export const shoppingItemsRelations = relations(shoppingItems, ({ one }) => ({
+  profile: one(shoppingProfiles, { fields: [shoppingItems.profileId], references: [shoppingProfiles.id] }),
 }))

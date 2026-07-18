@@ -208,8 +208,11 @@ export const updateUpgradeItemInputSchema = z.object({
 })
 export type UpdateUpgradeItemInput = z.infer<typeof updateUpgradeItemInputSchema>
 
+export const loreCategoryKindSchema = z.enum(['dark_fantasy', 'personal_project'])
+
 export const createLoreCategoryInputSchema = z.object({
   title: z.string().min(1, 'Título é obrigatório'),
+  kind: loreCategoryKindSchema.optional(),
 })
 export type CreateLoreCategoryInput = z.infer<typeof createLoreCategoryInputSchema>
 
@@ -234,3 +237,33 @@ export const updateLoreEntryInputSchema = z.object({
   orderIndex: z.coerce.number().int().optional(),
 })
 export type UpdateLoreEntryInput = z.infer<typeof updateLoreEntryInputSchema>
+
+export const createShoppingProfileInputSchema = z.object({
+  name: z.string().min(1, 'Nome é obrigatório'),
+})
+export type CreateShoppingProfileInput = z.infer<typeof createShoppingProfileInputSchema>
+
+export const updateShoppingProfileInputSchema = z.object({
+  name: z.string().min(1).optional(),
+})
+export type UpdateShoppingProfileInput = z.infer<typeof updateShoppingProfileInputSchema>
+
+export const shoppingUrgencySchema = z.enum(['baixa', 'media', 'alta'])
+
+export const createShoppingItemInputSchema = z.object({
+  profileId: z.string().min(1, 'Perfil é obrigatório'),
+  title: z.string().min(1, 'Título é obrigatório'),
+  notes: z.string().min(1).optional(),
+  priceCents: z.coerce.number().int().positive().optional(),
+  urgency: shoppingUrgencySchema.optional(),
+})
+export type CreateShoppingItemInput = z.infer<typeof createShoppingItemInputSchema>
+
+export const updateShoppingItemInputSchema = z.object({
+  title: z.string().min(1).optional(),
+  notes: z.string().min(1).nullable().optional(),
+  priceCents: z.coerce.number().int().positive().nullable().optional(),
+  urgency: shoppingUrgencySchema.optional(),
+  orderIndex: z.coerce.number().int().optional(),
+})
+export type UpdateShoppingItemInput = z.infer<typeof updateShoppingItemInputSchema>

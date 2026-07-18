@@ -9,10 +9,10 @@ import {
   ListTodoIcon,
   LayoutDashboardIcon,
   CpuIcon,
-  SkullIcon,
+  ShoppingCartIcon,
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { useTasks, useUpgradeItems, useLoreEntries, useLoreCategories } from '@/hooks'
+import { useTasks, useUpgradeItems, useShoppingItems, useShoppingProfiles } from '@/hooks'
 import type { Task } from '@/models'
 import { ApiError } from '@/services/apiClient'
 import { formatDate, formatTimeRemaining } from '@/utils/date.utils'
@@ -31,8 +31,8 @@ function activeBlockReason(task: Task): string | undefined {
 export function DashboardPage() {
   const { tasks, editTask, unblockTask } = useTasks()
   const { upgradeItems } = useUpgradeItems()
-  const { loreEntries } = useLoreEntries()
-  const { loreCategories } = useLoreCategories()
+  const { shoppingItems } = useShoppingItems()
+  const { shoppingProfiles } = useShoppingProfiles()
   const [rescheduleTask, setRescheduleTask] = useState<Task | null>(null)
 
   const pendingCount = tasks.filter(({ task }) => task.status !== 'done').length
@@ -54,6 +54,7 @@ export function DashboardPage() {
   }, [tasks])
 
   const upgradeDoneCount = upgradeItems.filter((item) => item.isDone).length
+  const pendingShoppingCount = shoppingItems.filter((item) => !item.isDone).length
 
   const stats = [
     { label: 'Tarefas', value: tasks.length, icon: ListTodoIcon },
@@ -224,16 +225,16 @@ export function DashboardPage() {
             </CardContent>
           </Card>
         </Link>
-        <Link to="/dark-fantasy">
+        <Link to="/compras">
           <Card className="transition-colors hover:bg-muted/50">
             <CardContent className="flex items-center justify-between gap-2">
               <div>
-                <p className="font-medium">Dark Fantasy</p>
+                <p className="font-medium">Lista de Compras</p>
                 <p className="text-sm text-muted-foreground">
-                  {loreEntries.length} página(s) em {loreCategories.length} categoria(s)
+                  {pendingShoppingCount} pendente(s) em {shoppingProfiles.length} perfil(is)
                 </p>
               </div>
-              <SkullIcon className="size-6 text-primary" />
+              <ShoppingCartIcon className="size-6 text-primary" />
             </CardContent>
           </Card>
         </Link>

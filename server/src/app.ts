@@ -20,6 +20,8 @@ import { upgradePhaseRoutes } from './routes/upgradePhases.routes.js'
 import { upgradeItemRoutes } from './routes/upgradeItems.routes.js'
 import { loreCategoryRoutes } from './routes/loreCategories.routes.js'
 import { loreEntryRoutes } from './routes/loreEntries.routes.js'
+import { shoppingProfileRoutes } from './routes/shoppingProfiles.routes.js'
+import { shoppingItemRoutes } from './routes/shoppingItems.routes.js'
 import { registerStatic } from './plugins/static.js'
 
 export function buildApp() {
@@ -58,6 +60,8 @@ export function buildApp() {
   app.register(upgradeItemRoutes, { prefix: '/api' })
   app.register(loreCategoryRoutes, { prefix: '/api' })
   app.register(loreEntryRoutes, { prefix: '/api' })
+  app.register(shoppingProfileRoutes, { prefix: '/api' })
+  app.register(shoppingItemRoutes, { prefix: '/api' })
 
   if (env.NODE_ENV === 'production') {
     app.register(registerStatic)
