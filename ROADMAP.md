@@ -42,6 +42,8 @@ Lista de melhorias planejadas para o organizador pessoal. Conforme forem sendo u
 - Comparativo estimado x executado
 - Exportar/importar tarefas em JSON (backup manual)
 - Arquivar tarefas concluídas antigas
+- **Mesão de Commander — controlador de turnos**: ao iniciar a mesão (junto com seleção dos participantes e vida inicial), definir também quem começa e a sequência/ordem de jogada, além do tempo definido por turno. Tela indica de quem é a vez; quando o tempo do jogador da vez acaba, dispara um alarme sonoro/visual avisando, e ele ganha mais X segundos (configurável) pra finalizar a jogada antes de passar a vez adiante.
+- **Mesão de Commander — dano global**: permitir que um jogador cause dano a todos os outros participantes de uma vez (efeitos de carta tipo "causa X de dano a todos os jogadores"), em vez de precisar enviar o dano um por um.
 
 ## Feito
 
