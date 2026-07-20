@@ -54,12 +54,10 @@ export interface UiSlice {
   notificationsEnabled: boolean
   activeFinanceProfileId: string | null
   activeShoppingProfileId: string | null
-  myCommanderPlayerId: string | null
   setTheme: (theme: Theme) => Promise<void>
   setNotificationsEnabled: (enabled: boolean) => Promise<void>
   setActiveFinanceProfileId: (id: string | null) => void
   setActiveShoppingProfileId: (id: string | null) => void
-  setMyCommanderPlayerId: (id: string | null) => void
 }
 
 export interface TaskSlice {
@@ -173,6 +171,8 @@ export interface ShoppingItemSlice {
 export interface CommanderPlayerSlice {
   commanderPlayers: CommanderPlayer[]
   commanderPlayersLoaded: boolean
+  myCommanderPlayerId: string | null
+  setMyCommanderPlayerId: (id: string | null) => void
   loadCommanderPlayers: () => Promise<void>
   addCommanderPlayer: (input: CreateCommanderPlayerInput) => Promise<CommanderPlayer>
   editCommanderPlayer: (id: string, patch: UpdateCommanderPlayerInput) => Promise<void>

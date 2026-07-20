@@ -2,9 +2,22 @@ import type { StateCreator } from 'zustand'
 import { commanderPlayerService } from '@/services'
 import type { AppState, CommanderPlayerSlice } from '../types'
 
+const MY_COMMANDER_PLAYER_STORAGE_KEY = 'commander:my-player-id'
+
+function loadMyCommanderPlayerId(): string | null {
+  if (typeof localStorage === 'undefined') return null
+  return localStorage.getItem(MY_COMMANDER_PLAYER_STORAGE_KEY)
+}
+
 export const createCommanderPlayerSlice: StateCreator<AppState, [], [], CommanderPlayerSlice> = (set, get) => ({
   commanderPlayers: [],
   commanderPlayersLoaded: false,
+  myCommanderPlayerId: loadMyCommanderPlayerId(),
+  setMyCommanderPlayerId: (id) => {
+    if (id) localStorage.setItem(MY_COMMANDER_PLAYER_STORAGE_KEY, id)
+    else localStorage.removeItem(MY_COMMANDER_PLAYER_STORAGE_KEY)
+    set({ myCommanderPlayerId: id })
+  },
   loadCommanderPlayers: async () => {
     const commanderPlayers = await commanderPlayerService.list()
     set({ commanderPlayers, commanderPlayersLoaded: true })

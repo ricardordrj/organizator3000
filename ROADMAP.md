@@ -45,6 +45,15 @@ Lista de melhorias planejadas para o organizador pessoal. Conforme forem sendo u
 - Exportar/importar tarefas em JSON (backup manual)
 - Arquivar tarefas concluídas antigas
 - **Mesão de Commander — controlador de turnos**: ao iniciar a mesão (junto com seleção dos participantes e vida inicial), definir também quem começa e a sequência/ordem de jogada, além do tempo definido por turno. Tela indica de quem é a vez; quando o tempo do jogador da vez acaba, dispara um alarme sonoro/visual avisando, e ele ganha mais X segundos (configurável) pra finalizar a jogada antes de passar a vez adiante.
+- **Desacoplar o Mesão de Commander em módulo realocável** — hoje o mesão é uma fatia vertical bem isolada (nenhuma outra feature depende dele; ele só *consome* infra compartilhada), então dá pra extrair pra um projeto próprio com esforço baixo/médio. Falta cortar os fios que o prendem à infra do host, na ordem de menor→maior esforço:
+  - [x] **Tirar o `myCommanderPlayerId` do `uiSlice`** — o estado "quem eu sou" morava no slice de UI genérico (junto de finanças/compras); movido pro `commanderPlayerSlice`, junto do resto do estado do commander (chave de `localStorage` mantida, sem migração pra usuários existentes).
+  - [ ] **Empacotar como módulo local antes de mudar de repo** — reunir components + hooks + services + models + rotas + schema num único recorte (ex: `src/features/commander/` no front e `server/src/modules/commander/` no back), com um `index.ts` de entrada e um `registerCommanderRoutes(app)` no back. Torna o "corte" trivial depois.
+  - [ ] **Desacoplar do `useAppStore` global** — `useCommanderPlayers` e `useMyCommanderPlayerId` leem do store compartilhado; dar ao commander um zustand/contexto próprio pra não precisar levar o store inteiro do app junto.
+  - [ ] **Separar os tipos costurados no host** — `CommanderPlayerSlice` embutido no `AppState` (`store/types.ts`) e os models no barrel `models/index.ts`.
+  - [ ] **Backend: fatiar o que é monolítico** — as 5 tabelas do commander vivem no `schema.ts` gigante (linhas ~378–479) e a validação Zod no `schemas.ts` compartilhado; separar em arquivos do módulo.
+  - [ ] **Backend: avatar reusa infra compartilhada** — `lib/uploadValidation.ts` + `env.UPLOADS_DIR` (`commanderPlayer.service.ts`); levar como lib interna ou parametrizar o diretório de uploads.
+  - [ ] **Tirar o conceito "mesão" do modelo de auth do host** — o role `'admin' | 'mesao'` (`server/src/lib/auth.ts`) e o bypass especial de `/api/commander-*` no hook de autorização (`app.ts`); num projeto standalone isso vira só "usuário autenticado".
+  - [ ] **Dependências de UI compartilhada** — `components/ui/*` (shadcn), `common/ConfirmDialog` e `services/apiClient` (com base `/api` hardcoded); portáveis, mas precisam ir junto ou virar libs.
 
 ## Feito
 
