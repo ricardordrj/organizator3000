@@ -43,9 +43,6 @@ import type {
   ShoppingItem,
   CreateShoppingItemInput,
   UpdateShoppingItemInput,
-  CommanderPlayer,
-  CreateCommanderPlayerInput,
-  UpdateCommanderPlayerInput,
 } from '@/models'
 
 export interface UiSlice {
@@ -54,12 +51,10 @@ export interface UiSlice {
   notificationsEnabled: boolean
   activeFinanceProfileId: string | null
   activeShoppingProfileId: string | null
-  myCommanderPlayerId: string | null
   setTheme: (theme: Theme) => Promise<void>
   setNotificationsEnabled: (enabled: boolean) => Promise<void>
   setActiveFinanceProfileId: (id: string | null) => void
   setActiveShoppingProfileId: (id: string | null) => void
-  setMyCommanderPlayerId: (id: string | null) => void
 }
 
 export interface TaskSlice {
@@ -170,16 +165,6 @@ export interface ShoppingItemSlice {
   removeShoppingItem: (id: string) => Promise<void>
 }
 
-export interface CommanderPlayerSlice {
-  commanderPlayers: CommanderPlayer[]
-  commanderPlayersLoaded: boolean
-  loadCommanderPlayers: () => Promise<void>
-  addCommanderPlayer: (input: CreateCommanderPlayerInput) => Promise<CommanderPlayer>
-  editCommanderPlayer: (id: string, patch: UpdateCommanderPlayerInput) => Promise<void>
-  removeCommanderPlayer: (id: string) => Promise<void>
-  uploadCommanderPlayerAvatar: (id: string, file: File) => Promise<void>
-}
-
 export interface AppState
   extends UiSlice,
     TaskSlice,
@@ -195,7 +180,6 @@ export interface AppState
     LoreCategorySlice,
     LoreEntrySlice,
     ShoppingProfileSlice,
-    ShoppingItemSlice,
-    CommanderPlayerSlice {
+    ShoppingItemSlice {
   hydrate: () => Promise<void>
 }

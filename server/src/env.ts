@@ -7,8 +7,7 @@ const envSchema = z.object({
   NODE_ENV: z.string().default('development'),
 
   // Controle de acesso (ver DEPLOY.md, seção "Proteger o acesso").
-  // Admin vê tudo; qualquer outro e-mail autenticado fica preso no mesão.
-  // A lista de quem entra no mesão vive no Cloudflare Access, não aqui.
+  // Só quem está aqui acessa a API; qualquer outro e-mail autenticado recebe 403.
   ADMIN_EMAILS: z.string().default('ricardordrj@gmail.com'),
   // Domínio do time no Zero Trust, ex: "seutime.cloudflareaccess.com".
   // Se preenchido, a identidade vem do JWT assinado (Cf-Access-Jwt-Assertion),

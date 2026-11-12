@@ -1,5 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { Toaster } from 'sonner'
+import { LockIcon, LogOutIcon } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { AppProvider } from '@/context/AppProvider'
 import { useAppContext } from '@/context'
 import { AppLayout } from '@/components/layout/AppLayout'
@@ -11,7 +13,6 @@ import { CadastrosPage } from '@/pages/CadastrosPage'
 import { FinancesPage } from '@/pages/FinancesPage'
 import { ProjectsPage } from '@/pages/ProjectsPage'
 import { ComprasPage } from '@/pages/ComprasPage'
-import { CommanderPage } from '@/pages/CommanderPage'
 import { useTheme } from '@/hooks'
 
 function AppToaster() {
@@ -19,16 +20,21 @@ function AppToaster() {
   return <Toaster theme={theme} richColors closeButton position="top-right" />
 }
 
-// Usuários do mesão ficam presos só na tela do mesão; qualquer outra rota
-// redireciona pra lá. Admin acessa tudo.
-function MesaoRoutes() {
+const LOGOUT_URL = '/cdn-cgi/access/logout'
+
+function NoAccess({ email }: { email: string }) {
   return (
-    <Routes>
-      <Route element={<AppLayout />}>
-        <Route path="mesao" element={<CommanderPage />} />
-        <Route path="*" element={<Navigate to="/mesao" replace />} />
-      </Route>
-    </Routes>
+    <div className="flex min-h-svh flex-col items-center justify-center gap-4 bg-background px-4 text-center">
+      <LockIcon className="size-8 text-muted-foreground" />
+      <div className="flex flex-col gap-1">
+        <p className="font-medium">Sem acesso</p>
+        <p className="text-sm text-muted-foreground">{email} não tem permissão para usar este app.</p>
+      </div>
+      <Button variant="outline" size="sm" onClick={() => window.location.assign(LOGOUT_URL)}>
+        <LogOutIcon className="size-3.5" />
+        Sair
+      </Button>
+    </div>
   )
 }
 
@@ -43,7 +49,6 @@ function AdminRoutes() {
         <Route path="financas" element={<FinancesPage />} />
         <Route path="compras" element={<ComprasPage />} />
         <Route path="projetos" element={<ProjectsPage />} />
-        <Route path="mesao" element={<CommanderPage />} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="roadmap" element={<Navigate to="/settings" replace />} />
         <Route path="upgrade-pc" element={<Navigate to="/compras" replace state={{ tab: 'upgrade-pc' }} />} />
@@ -55,7 +60,8 @@ function AdminRoutes() {
 
 function AppRoutes() {
   const { user } = useAppContext()
-  return user?.role === 'mesao' ? <MesaoRoutes /> : <AdminRoutes />
+  if (user && user.role !== 'admin') return <NoAccess email={user.email} />
+  return <AdminRoutes />
 }
 
 function App() {

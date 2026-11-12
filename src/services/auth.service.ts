@@ -1,6 +1,6 @@
 import { apiClient } from './apiClient'
 
-export type UserRole = 'admin' | 'mesao'
+export type UserRole = 'admin' | 'guest'
 
 export interface CurrentUser {
   email: string

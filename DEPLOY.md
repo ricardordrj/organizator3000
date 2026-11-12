@@ -142,9 +142,7 @@ Acompanha em **Actions**, no GitHub — se rodar verde, o site já deve refletir
 Dois níveis trabalhando juntos:
 
 - **Cloudflare Access** faz o *login* (Google) na frente do domínio inteiro. Ninguém chega no servidor sem passar por aqui.
-- **O app** faz a *autorização*: olha o e-mail de quem entrou e decide o que a pessoa vê. Quem está em `ADMIN_EMAILS` vê o app todo; **qualquer outro e-mail autenticado fica preso só na tela do Mesão** (as demais páginas somem e as APIs fora do mesão respondem `403`).
-
-Consequência prática: a lista de quem entra no mesão vive **só no Cloudflare** — é a lista de e-mails da política de acesso. Adicionar mais uma pessoa ao mesão = colar o e-mail dela lá, sem mexer no código e sem deploy.
+- **O app** faz a *autorização*: olha o e-mail de quem entrou e decide o que a pessoa vê. Quem está em `ADMIN_EMAILS` vê o app todo; **qualquer outro e-mail autenticado vê só uma tela de "Sem acesso"** e a API responde `403`.
 
 ### 8.1 Ativar o Zero Trust
 
@@ -178,17 +176,15 @@ Zero Trust → **Access → Applications → Add an application → Self-hosted*
 4. Cria a **Access Policy**:
    - Nome: `Acesso liberado`
    - Action: **Allow**
-   - Include: **Emails** → seu e-mail (`ricardordrj@gmail.com`) **e** os e-mails do pessoal do mesão (ex: `francinibrentegani@gmail.com`)
+   - Include: **Emails** → seu e-mail (`ricardordrj@gmail.com`)
 5. Salva
 
 Depois de salvar, abre a aba **Overview** do app e copia o **Application Audience (AUD) Tag** — é o `CF_ACCESS_AUD` do passo 8.5.
 
-### 8.4 Quem é admin vs. quem é do mesão
+### 8.4 Quem é admin
 
 - **Admin** = e-mails listados em `ADMIN_EMAILS` no servidor (passo 8.5). Por padrão já é `ricardordrj@gmail.com`. Vê o app inteiro.
-- **Mesão** = *qualquer outro* e-mail que esteja na política do Access mas **não** em `ADMIN_EMAILS`. Cai direto no `/mesao` e não sai de lá.
-
-Ou seja: pra liberar mais gente pro mesão (os "5 e depois mais"), você **só adiciona o e-mail na Access Policy do passo 8.3** — o app automaticamente trata como mesão. Pra revogar, tira o e-mail da política.
+- Qualquer outro e-mail que passe pela política do Access mas **não** esteja em `ADMIN_EMAILS` cai numa tela de "Sem acesso", só com o botão de sair.
 
 ### 8.5 Ligar a verificação no servidor
 
@@ -212,7 +208,7 @@ systemctl --user restart organizator3000
 ### 8.6 Testar
 
 1. Aba anônima em `https://ricardordrj.com` com **seu** e-mail → login Google → você vê o app inteiro.
-2. Aba anônima com o e-mail de alguém do mesão → login Google → cai direto no Mesão, sem menu das outras telas. Digitar `https://ricardordrj.com/financas` na mão redireciona de volta pro mesão, e a API responde `403`.
+2. Aba anônima com um e-mail que esteja na política do Access mas não em `ADMIN_EMAILS` → login Google → aparece a tela de "Sem acesso", e a API responde `403`.
 
 ## Notas de segurança
 

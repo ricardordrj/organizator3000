@@ -31,7 +31,6 @@ import { createLoreCategorySlice } from './slices/loreCategorySlice'
 import { createLoreEntrySlice } from './slices/loreEntrySlice'
 import { createShoppingProfileSlice } from './slices/shoppingProfileSlice'
 import { createShoppingItemSlice } from './slices/shoppingItemSlice'
-import { createCommanderPlayerSlice } from './slices/commanderPlayerSlice'
 import type { AppState } from './types'
 
 export const useAppStore = create<AppState>()((set, get, api) => ({
@@ -50,7 +49,6 @@ export const useAppStore = create<AppState>()((set, get, api) => ({
   ...createLoreEntrySlice(set, get, api),
   ...createShoppingProfileSlice(set, get, api),
   ...createShoppingItemSlice(set, get, api),
-  ...createCommanderPlayerSlice(set, get, api),
   hydrate: async () => {
     const [
       settings,

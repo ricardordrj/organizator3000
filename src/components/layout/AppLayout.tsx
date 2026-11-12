@@ -8,12 +8,10 @@ import {
   ShoppingCartIcon,
   SettingsIcon,
   MoreHorizontalIcon,
-  SwordsIcon,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useTaskDeadlineNotifications } from '@/hooks'
-import { useAppContext } from '@/context'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { AmbientGlow } from './AmbientGlow'
 import { UserMenu } from './UserMenu'
@@ -31,7 +29,6 @@ const navItems: NavItem[] = [
   { to: '/financas', label: 'Finanças', end: false, icon: WalletIcon },
   { to: '/compras', label: 'Compras', end: false, icon: ShoppingCartIcon },
   { to: '/projetos', label: 'Projetos', end: false, icon: FolderKanbanIcon },
-  { to: '/mesao', label: 'Mesão', end: false, icon: SwordsIcon },
   { to: '/settings', label: 'Configurações', end: false, icon: SettingsIcon },
   { to: '/cadastros', label: 'Cadastros', end: false, icon: UsersIcon },
 ]
@@ -90,7 +87,6 @@ function TabBarLink({ item }: { item: NavItem }) {
 
 function MobileTabBar({ items }: { items: NavItem[] }) {
   const location = useLocation()
-  // Com poucos itens (ex: só o mesão) tudo cabe direto na barra, sem "Mais".
   const usesOverflow = items.length > 5
   const primaryMobileItems = usesOverflow
     ? items.filter((item) => primaryMobilePaths.includes(item.to))
@@ -154,11 +150,6 @@ function MobileTabBar({ items }: { items: NavItem[] }) {
 
 export function AppLayout() {
   useTaskDeadlineNotifications()
-  const { user } = useAppContext()
-
-  // Usuários do mesão só enxergam a navegação do mesão.
-  const visibleNavItems =
-    user?.role === 'mesao' ? navItems.filter((item) => item.to === '/mesao') : navItems
 
   return (
     <div className="flex min-h-svh flex-col">
@@ -169,7 +160,7 @@ export function AppLayout() {
             Organizador Pessoal
           </h1>
           <div className="flex items-center gap-2">
-            <DesktopNav items={visibleNavItems} />
+            <DesktopNav items={navItems} />
             <UserMenu />
           </div>
         </div>
@@ -179,7 +170,7 @@ export function AppLayout() {
           <Outlet />
         </div>
       </main>
-      <MobileTabBar items={visibleNavItems} />
+      <MobileTabBar items={navItems} />
     </div>
   )
 }

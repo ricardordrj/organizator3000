@@ -23,9 +23,6 @@ import { loreCategoryRoutes } from './routes/loreCategories.routes.js'
 import { loreEntryRoutes } from './routes/loreEntries.routes.js'
 import { shoppingProfileRoutes } from './routes/shoppingProfiles.routes.js'
 import { shoppingItemRoutes } from './routes/shoppingItems.routes.js'
-import { commanderPlayerRoutes } from './routes/commanderPlayers.routes.js'
-import { commanderGameRoutes } from './routes/commanderGames.routes.js'
-import { commanderSeasonRoutes } from './routes/commanderSeasons.routes.js'
 import { registerStatic } from './plugins/static.js'
 
 export function buildApp() {
@@ -51,7 +48,7 @@ export function buildApp() {
 
   // Autorização por identidade da Cloudflare Access. Só protege a API; os
   // arquivos estáticos já ficam atrás do login do Access no nível do domínio.
-  // Admin acessa tudo; qualquer outro logado só alcança as rotas do mesão.
+  // Só admin acessa; qualquer outro logado consegue no máximo consultar /api/me.
   app.addHook('onRequest', async (request, reply) => {
     const url = request.raw.url ?? ''
     if (!url.startsWith('/api')) return
@@ -70,10 +67,7 @@ export function buildApp() {
 
     if (identity.role === 'admin') return
 
-    const isCommanderRoute = url.startsWith('/api/commander-')
-    if (isCommanderRoute) return
-
-    reply.code(403).send({ error: 'Acesso restrito ao mesão' })
+    reply.code(403).send({ error: 'Acesso restrito' })
   })
 
   app.get('/api/me', async (request) => {
@@ -98,9 +92,6 @@ export function buildApp() {
   app.register(loreEntryRoutes, { prefix: '/api' })
   app.register(shoppingProfileRoutes, { prefix: '/api' })
   app.register(shoppingItemRoutes, { prefix: '/api' })
-  app.register(commanderPlayerRoutes, { prefix: '/api' })
-  app.register(commanderGameRoutes, { prefix: '/api' })
-  app.register(commanderSeasonRoutes, { prefix: '/api' })
 
   if (env.NODE_ENV === 'production') {
     app.register(registerStatic)

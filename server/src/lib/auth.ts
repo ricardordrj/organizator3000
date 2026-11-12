@@ -2,7 +2,7 @@ import { createRemoteJWKSet, jwtVerify } from 'jose'
 import type { FastifyRequest } from 'fastify'
 import { env } from '../env.js'
 
-export type Role = 'admin' | 'mesao'
+export type Role = 'admin' | 'guest'
 
 export interface Identity {
   email: string
@@ -22,7 +22,7 @@ const adminEmails = new Set(
 )
 
 function roleFor(email: string): Role {
-  return adminEmails.has(email.toLowerCase()) ? 'admin' : 'mesao'
+  return adminEmails.has(email.toLowerCase()) ? 'admin' : 'guest'
 }
 
 // A verificação do JWT usa as chaves públicas da Cloudflare, buscadas sob

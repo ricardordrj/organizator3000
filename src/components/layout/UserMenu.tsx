@@ -22,7 +22,7 @@ export function UserMenu() {
       <PopoverContent align="end" className="w-64">
         <div className="flex flex-col gap-0.5">
           <span className="font-mono text-[0.625rem] tracking-widest text-muted-foreground uppercase">
-            {user.role === 'admin' ? 'Admin' : 'Mesão'}
+            {user.role === 'admin' ? 'Admin' : 'Sem acesso'}
           </span>
           <span className="truncate text-sm font-medium">{user.email}</span>
         </div>

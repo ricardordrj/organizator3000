@@ -25,9 +25,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [isReady, setIsReady] = useState(false)
 
   useEffect(() => {
-    // Primeiro descobre quem está logado (via Cloudflare Access). Admin puxa o
-    // app inteiro; quem é do mesão pula o hydrate pesado — a tela do mesão
-    // carrega os próprios dados e as demais APIs seriam negadas de qualquer forma.
+    // Primeiro descobre quem está logado (via Cloudflare Access). Só admin
+    // carrega os dados; para os demais a API responde 403 de qualquer forma.
     authService
       .me()
       .then(async (currentUser) => {
